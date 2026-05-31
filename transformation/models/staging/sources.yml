@@ -1,0 +1,188 @@
+version: 2
+
+sources:
+  - name: horror_movies
+    database: horror_movies
+    schema: raw
+    tables:
+      - name: movie_catalogue
+        description: "Raw movie catalogue data from TMDB discover endpoint"
+        columns:
+          - name: id
+            description: "TMDB movie ID"
+            tests:
+              - not_null
+              - unique
+          - name: title
+            description: "Movie title"
+          - name: original_title
+            description: "Original movie title"
+          - name: release_date
+            description: "Release date in YYYY-MM-DD format"
+          - name: original_language
+            description: "Original language code"
+          - name: adult
+            description: "Whether the movie is adult content"
+          - name: video
+            description: "Whether the movie has video content"
+          - name: backdrop_path
+            description: "Path to backdrop image"
+          - name: poster_path
+            description: "Path to poster image"
+          - name: overview
+            description: "Movie overview/synopsis"
+          - name: _dlt_load_id
+            description: "DLT load identifier"
+          - name: _dlt_id
+            description: "DLT unique identifier"
+
+      - name: movie_details
+        description: "Detailed movie information from TMDB"
+        columns:
+          - name: id
+            description: "TMDB movie ID"
+            tests:
+              - not_null
+              - unique
+          - name: imdb_id
+            description: "IMDb ID"
+          - name: title
+            description: "Movie title"
+          - name: original_title
+            description: "Original movie title"
+          - name: release_date
+            description: "Release date"
+          - name: original_language
+            description: "Original language"
+          - name: adult
+            description: "Adult content flag"
+          - name: video
+            description: "Video content flag"
+          - name: popularity
+            description: "Popularity score"
+          - name: vote_average
+            description: "Average vote rating"
+          - name: vote_count
+            description: "Number of votes"
+          - name: budget
+            description: "Movie budget"
+          - name: revenue
+            description: "Movie revenue"
+          - name: runtime
+            description: "Runtime in minutes"
+          - name: status
+            description: "Release status"
+          - name: tagline
+            description: "Movie tagline"
+          - name: us_certification
+            description: "US certification (MPAA rating)"
+          - name: genre_names
+            description: "Comma-separated genre names"
+          - name: backdrop_path
+            description: "Backdrop image path"
+          - name: poster_path
+            description: "Poster image path"
+          - name: overview
+            description: "Movie overview"
+          - name: _dlt_load_id
+            description: "DLT load identifier"
+          - name: _dlt_id
+            description: "DLT unique identifier"
+
+      - name: movie_keywords
+        description: "Movie keywords from TMDB"
+        columns:
+          - name: movie_id
+            description: "TMDB movie ID"
+            tests:
+              - not_null
+          - name: keyword_id
+            description: "Keyword ID"
+            tests:
+              - not_null
+          - name: keyword_name
+            description: "Keyword name"
+          - name: _dlt_load_id
+            description: "DLT load identifier"
+          - name: _dlt_id
+            description: "DLT unique identifier"
+
+      - name: omdb_metadata
+        description: "OMDb metadata for movies"
+        columns:
+          - name: tmdb_id
+            description: "TMDB movie ID"
+            tests:
+              - not_null
+          - name: imdb_id
+            description: "IMDb ID"
+          - name: title
+            description: "Movie title"
+          - name: year
+            description: "Release year"
+          - name: rated
+            description: "MPAA rating"
+          - name: runtime
+            description: "Runtime"
+          - name: director
+            description: "Director name"
+          - name: writer
+            description: "Writer name"
+          - name: actors
+            description: "Main actors"
+          - name: plot
+            description: "Movie plot"
+          - name: awards
+            description: "Awards information"
+          - name: dvd
+            description: "DVD release date"
+          - name: _dlt_load_id
+            description: "DLT load identifier"
+          - name: _dlt_id
+            description: "DLT unique identifier"
+
+      - name: omdb_ratings
+        description: "OMDb ratings and scores for movies"
+        columns:
+          - name: tmdb_id
+            description: "TMDB movie ID"
+            tests:
+              - not_null
+          - name: imdb_id
+            description: "IMDb ID"
+          - name: title
+            description: "Movie title"
+          - name: year
+            description: "Release year"
+          - name: rated
+            description: "MPAA rating"
+          - name: runtime
+            description: "Runtime"
+          - name: director
+            description: "Director name"
+          - name: writer
+            description: "Writer name"
+          - name: actors
+            description: "Main actors"
+          - name: plot
+            description: "Movie plot"
+          - name: awards
+            description: "Awards information"
+          - name: imdb_rating
+            description: "IMDb rating"
+          - name: imdb_votes
+            description: "IMDb votes count"
+          - name: metascore
+            description: "Metacritic score"
+          - name: metacritic_score
+            description: "Metacritic score (parsed)"
+          - name: rotten_tomatoes_score
+            description: "Rotten Tomatoes score"
+          - name: box_office
+            description: "Box office revenue"
+          - name: dvd
+            description: "DVD release date"
+          - name: _dlt_load_id
+            description: "DLT load identifier"
+          - name: _dlt_id
+            description: "DLT unique identifier"

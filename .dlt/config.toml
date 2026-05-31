@@ -1,0 +1,10 @@
+# Non-secret configuration values for the horror movie analytics pipeline.
+
+[sources.tmdb]
+base_url = "https://api.themoviedb.org/3"
+
+[sources.omdb]
+base_url = "http://www.omdbapi.com/"
+
+[destination.duckdb]
+dataset_name = "raw"

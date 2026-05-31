@@ -1,0 +1,26 @@
+init:
+  version: 0.1.0
+  description: Shared rules, secrets handling, and workspace MCP for dlt
+  tags:
+  - dlt
+  - init
+  - rulesabout:blank#blocked
+  - secrets
+  - mcp
+  installed_at: '2026-04-04T17:11:17.941213+00:00'
+  agent: claude
+  files:
+    .claude/skills/improve-skills/SKILL.md:
+      sha3_256: c52b222d82d101eaacbbf19d271d3f24b20d8e2bc70d49919d56144d448cd5c4
+    .claude/skills/setup-secrets/SKILL.md:
+      sha3_256: ba00c7451c4686cd37d1bb4242487751fe5e2402c3f9f6ae5888ba42f922a166
+    .claude/skills/setup-secrets/cli-reference.md:
+      sha3_256: afb4bebdc1f3a84cd692303e069ed729ea32820d8efd5f8d3cccfe702c18e979
+    .claude/skills/toolkit-dispatch/SKILL.md:
+      sha3_256: a90e45a30a169041b8c05efaeff3f37cbd401358a54ec8f5e641d92e132f5979
+    .claudeignore:
+      sha3_256: 1aa4dc9286dd219dcb55399f388c5ee1f940ab5e399a42b644d488cba57a9ec0
+    .claude/rules/init-dlthub-workspace.md:
+      sha3_256: c551ac71f74277ebb85a81f7ce823144b4bf02cd3865fa3cf3c899b0687d3883
+  mcp_servers:
+  - dlt-workspace-mcp

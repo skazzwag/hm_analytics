@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "dlt-workspace-mcp": {
+      "command": "uv",
+      "args": [
+        "run",
+        "dlt",
+        "ai",
+        "mcp",
+        "--stdio"
+      ]
+    },
+    "duckdb-local": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-motherduck",
+        "--db-path",
+        "/home/zak/GitHub/hm_analytics/horror_movies.duckdb"
+      ]
+    },
+    "motherduck-remote": {
+      "url": "https://api.motherduck.com/mcp",
+      "type": "http"
+    }
+  }
+}
