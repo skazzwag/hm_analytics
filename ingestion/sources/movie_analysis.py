@@ -94,16 +94,16 @@ def run_movie_analysis_pipeline() -> None:
     pipeline = dlt.pipeline(
         pipeline_name="violence_gore_analysis",
         destination="motherduck",
-        dataset_name="violence_gore_analysis"
+        dataset_name="raw"
     )
 
-    # Define the resource for movie data
-    @dlt.resource(name="movie_data", write_disposition="append")
-    def movie_data() -> Iterator[Dict]:
+    # Define the resource for violence/gore analysis
+    @dlt.resource(name="violence_gore_analysis", write_disposition="append")
+    def violence_gore_analysis() -> Iterator[Dict]:
         """
-        Resource to fetch movie data from the movie_catalogue table for movies not yet analyzed.
+        Resource to send requests to Claude API for violence/gore analysis.
         """
-        # Get all movies from movie_catalogue
+        # Get all movies from raw.movie_catalogue
         query = """
         SELECT title, release_date
         FROM raw.movie_catalogue
@@ -119,7 +119,7 @@ def run_movie_analysis_pipeline() -> None:
             try:
                 processed_query = """
                 SELECT title, release_date
-                FROM violence_gore_analysis
+                FROM raw.violence_gore_analysis
                 """
                 with client.execute_query(processed_query) as cursor:
                     processed_movies = {(row[0], row[1]) for row in cursor.fetchall()}
@@ -129,36 +129,22 @@ def run_movie_analysis_pipeline() -> None:
             # Yield only the first unprocessed movie
             for movie in all_movies:
                 if (movie["title"], movie["release_date"]) not in processed_movies:
-                    yield movie
-                    return
-
-    # Define the resource for violence/gore analysis
-    @dlt.resource(name="violence_gore_analysis", write_disposition="append")
-    def violence_gore_analysis() -> Iterator[Dict]:
-        """
-        Resource to send requests to the Mistral API for violence/gore analysis.
-        """
-        for movie in movie_data():
-            try:
-                analysis = get_violence_gore_analysis(movie['title'], movie['release_date'])
-                yield {
-                    "title": movie["title"],
-                    "release_date": movie["release_date"],
-                    "model": "mistral",
-                    "model_response": analysis,
-                    "timestamp": datetime.now(timezone.utc)
-                }
-            except Exception as e:
-                print(f"Error analyzing movie {movie['title']}: {e}")
-                continue
+                    try:
+                        analysis = get_violence_gore_analysis(movie['title'], movie['release_date'])
+                        yield {
+                            "title": movie["title"],
+                            "release_date": movie["release_date"],
+                            "model": "claude-sonnet-4-6",
+                            "model_response": analysis,
+                            "timestamp": datetime.now(timezone.utc)
+                        }
+                        return
+                    except Exception as e:
+                        print(f"Error analyzing movie {movie['title']}: {e}")
+                        continue
 
     # Run the pipeline
-    load_info = pipeline.run(
-        [
-            movie_data(),
-            violence_gore_analysis()
-        ]
-    )
+    load_info = pipeline.run([violence_gore_analysis()])
 
     print(f"Pipeline run completed: {load_info}")
 
