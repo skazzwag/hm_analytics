@@ -56,15 +56,17 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
     """
 
     # API endpoint and parameters
-    url = "https://api.mistral.ai/v1/chat/completions"
+    url = "https://api.anthropic.com/v1/messages"
     params = {
-        "model": "mistral-small-latest",
+        "model": "claude-sonnet-4-6",
+        "max_tokens": 1024,
         "messages": [{"role": "user", "content": prompt}]
     }
 
     headers = {
-        "Authorization": f"Bearer {os.environ['MISTRAL_API_KEY']}",
-        "Content-Type": "application/json"
+        "x-api-key": os.environ['ANTHROPIC_API_KEY'],
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json"
     }
 
     # Make the API request
@@ -73,7 +75,7 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
 
     # Extract and return the response content
     response_data = response.json()
-    return response_data['choices'][0]['message']['content']
+    return response_data['content'][0]['text']
 
 # Main pipeline function
 
