@@ -1,0 +1,165 @@
+import os
+import requests
+import dlt
+from typing import Iterator, Dict
+from datetime import datetime, timezone
+
+# Constants
+REQUEST_DELAY = 0.5  # Delay between API requests to avoid rate limiting
+
+# Function to send request to Mistral API
+
+def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
+    """
+    Send a request to the Mistral API to get violence/gore severity and frequency.
+
+    Parameters
+    ----------
+    title : str
+        The title of the movie to analyze.
+    release_date : str
+        The release date of the movie in YYYY-MM-DD format.
+
+    Returns
+    -------
+    Dict
+        A dictionary containing the violence/gore analysis results.
+
+    Raises
+    ------
+    requests.HTTPError
+        If the API request fails.
+    """
+    # Define the prompt for the Mistral API
+
+    prompt = f"""
+    Search the movie '{title}' released on {release_date} to determine the severity and frequency of its violence and gore content.
+    Make sure that you match the film title and date in case there's more than one movie with the same date. If you cannot find any pertinent information on the movie then state that you are unable to find it. Ensure that you only use one label for severity and one label for frequency, shown in the tables below
+
+    For level of violence/gore use the following rating system. As an example in this system, Terrifier would be extreme, The Shining is high, and Lake Mungo would be mild.
+
+    | Severity Label | Keywords/Descriptors | Example |
+    | --- | --- | --- |
+    | Mild | Minor injuries, implied violence, no blood | "A character is pushed to the ground" |
+    | Moderate | Blood, injuries, some gore | "A character is stabbed; blood shown" |
+    | High | Graphic injuries, mutilation, psychological | "A face is unrecognizably mutilated" |
+    | Extreme | Dismemberment, torture, cannibalism, rituals | "Lungs pulled out through the back" |
+
+    For frequency of violence/gore use the following rating system. As an example in this system, Terrifier would be pervasive, The Shining is occasional, and Lake Mungo would be isolated.
+
+    | Frequency Label | Definition | Example Descriptors in Parents Guide |
+    | --- | --- | --- |
+    | Isolated | 1–2 brief or minor instances of violence/gore. | "One scene of blood," "a character is pushed," "a single gunshot" |
+    | Occasional | 3–5 scenes, or violence/gore is present but not central to the plot. | "Several scenes of blood," "some violent confrontations," "a few gory moments" |
+    | Frequent | 6+ scenes, or violence/gore is a recurring element. | "Many scenes of bloodshed," "repeated torture," "violence throughout the film" |
+    | Pervasive | Violence/gore is constant, central to the plot, or described as overwhelming. | "Constant gore," "non-stop violence," "the entire film is filled with disturbing scenes" |
+    """
+
+    # API endpoint and parameters
+    url = "https://api.mistral.ai/v1/chat/completions"
+    params = {
+        "model": "mistral-small-latest",
+        "messages": [{"role": "user", "content": prompt}]
+    }
+
+    headers = {
+        "Authorization": f"Bearer {os.environ['MISTRAL_API_KEY']}",
+        "Content-Type": "application/json"
+    }
+
+    # Make the API request
+    response = requests.post(url, json=params, headers=headers)
+    response.raise_for_status()
+
+    # Extract and return the response content
+    response_data = response.json()
+    return response_data['choices'][0]['message']['content']
+
+# Main pipeline function
+
+def run_movie_analysis_pipeline() -> None:
+    """
+    Main function to run the dlt pipeline that extracts movie data and sends requests to the Mistral API.
+
+    This function initializes the pipeline, defines the resources for movie data and violence/gore analysis,
+    and runs the pipeline to process the data.
+
+    Returns
+    -------
+    None
+    """
+    # Initialize the pipeline
+    pipeline = dlt.pipeline(
+        pipeline_name="violence_gore_analysis",
+        destination="motherduck",
+        dataset_name="violence_gore_analysis"
+    )
+
+    # Define the resource for movie data
+    @dlt.resource(name="movie_data", write_disposition="append")
+    def movie_data() -> Iterator[Dict]:
+        """
+        Resource to fetch movie data from the movie_catalogue table for movies not yet analyzed.
+        """
+        # Get all movies from movie_catalogue
+        query = """
+        SELECT title, release_date
+        FROM raw.movie_catalogue
+        """
+
+        with pipeline.sql_client() as client:
+            # Get all movies
+            with client.execute_query(query) as cursor:
+                all_movies = [{"title": row[0], "release_date": row[1]} for row in cursor.fetchall()]
+
+            # Get already processed movies (table may not exist on first run)
+            processed_movies = set()
+            try:
+                processed_query = """
+                SELECT title, release_date
+                FROM violence_gore_analysis
+                """
+                with client.execute_query(processed_query) as cursor:
+                    processed_movies = {(row[0], row[1]) for row in cursor.fetchall()}
+            except:
+                pass  # Table doesn't exist yet, so no movies processed
+
+            # Yield only the first unprocessed movie
+            for movie in all_movies:
+                if (movie["title"], movie["release_date"]) not in processed_movies:
+                    yield movie
+                    return
+
+    # Define the resource for violence/gore analysis
+    @dlt.resource(name="violence_gore_analysis", write_disposition="append")
+    def violence_gore_analysis() -> Iterator[Dict]:
+        """
+        Resource to send requests to the Mistral API for violence/gore analysis.
+        """
+        for movie in movie_data():
+            try:
+                analysis = get_violence_gore_analysis(movie['title'], movie['release_date'])
+                yield {
+                    "title": movie["title"],
+                    "release_date": movie["release_date"],
+                    "model": "mistral",
+                    "model_response": analysis,
+                    "timestamp": datetime.now(timezone.utc)
+                }
+            except Exception as e:
+                print(f"Error analyzing movie {movie['title']}: {e}")
+                continue
+
+    # Run the pipeline
+    load_info = pipeline.run(
+        [
+            movie_data(),
+            violence_gore_analysis()
+        ]
+    )
+
+    print(f"Pipeline run completed: {load_info}")
+
+# Run the pipeline if this script is executed directly
+if __name__ == "__main__":
+    run_movie_analysis_pipeline()
