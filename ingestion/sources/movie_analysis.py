@@ -1,13 +1,15 @@
 import os
-import requests
-import dlt
-from typing import Iterator, Dict
 from datetime import datetime, timezone
+from typing import Dict, Iterator
+
+import dlt
+import requests
 
 # Constants
 REQUEST_DELAY = 0.5  # Delay between API requests to avoid rate limiting
 
 # Function to send request to Mistral API
+
 
 def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
     """
@@ -60,13 +62,13 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
     params = {
         "model": "claude-sonnet-4-6",
         "max_tokens": 1024,
-        "messages": [{"role": "user", "content": prompt}]
+        "messages": [{"role": "user", "content": prompt}],
     }
 
     headers = {
-        "x-api-key": os.environ['ANTHROPIC_API_KEY'],
+        "x-api-key": os.environ["ANTHROPIC_API_KEY"],
         "anthropic-version": "2023-06-01",
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
     # Make the API request
@@ -75,9 +77,11 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
 
     # Extract and return the response content
     response_data = response.json()
-    return response_data['content'][0]['text']
+    return response_data["content"][0]["text"]
+
 
 # Main pipeline function
+
 
 def run_movie_analysis_pipeline() -> None:
     """
@@ -94,14 +98,15 @@ def run_movie_analysis_pipeline() -> None:
     pipeline = dlt.pipeline(
         pipeline_name="violence_gore_analysis",
         destination="motherduck",
-        dataset_name="raw"
+        dataset_name="raw",
     )
 
     # Define the resource for violence/gore analysis
     @dlt.resource(name="violence_gore_analysis", write_disposition="append")
-    def violence_gore_analysis() -> Iterator[Dict]:
+    def violence_gore_analysis(batch_size: int = 300) -> Iterator[Dict]:
         """
         Resource to send requests to Claude API for violence/gore analysis.
+        Processes movies in batches of specified size.
         """
         # Get all movies from raw.movie_catalogue
         query = """
@@ -112,7 +117,7 @@ def run_movie_analysis_pipeline() -> None:
         with pipeline.sql_client() as client:
             # Get all movies
             with client.execute_query(query) as cursor:
-                all_movies = [{"title": row[0], "release_date": row[1]} for row in cursor.fetchall()]
+                all_movies = {(row[0], row[1]) for row in cursor.fetchall()}
 
             # Get already processed movies (table may not exist on first run)
             processed_movies = set()
@@ -126,27 +131,29 @@ def run_movie_analysis_pipeline() -> None:
             except:
                 pass  # Table doesn't exist yet, so no movies processed
 
-            # Yield only the first unprocessed movie
-            for movie in all_movies:
-                if (movie["title"], movie["release_date"]) not in processed_movies:
-                    try:
-                        analysis = get_violence_gore_analysis(movie['title'], movie['release_date'])
-                        yield {
-                            "title": movie["title"],
-                            "release_date": movie["release_date"],
-                            "model": "claude-sonnet-4-6",
-                            "model_response": analysis,
-                            "timestamp": datetime.now(timezone.utc)
-                        }
-                        return
-                    except Exception as e:
-                        print(f"Error analyzing movie {movie['title']}: {e}")
-                        continue
+            # Get unprocessed movies and limit to batch size
+            unprocessed_movies = all_movies - processed_movies
+
+            # Process first batch_size movies
+            for title, release_date in list(unprocessed_movies)[:batch_size]:
+                try:
+                    analysis = get_violence_gore_analysis(title, release_date)
+                    yield {
+                        "title": title,
+                        "release_date": release_date,
+                        "model": "claude-sonnet-4-6",
+                        "model_response": analysis,
+                        "timestamp": datetime.now(timezone.utc),
+                    }
+                except Exception as e:
+                    print(f"Error analyzing movie {title}: {e}")
+                    continue
 
     # Run the pipeline
     load_info = pipeline.run([violence_gore_analysis()])
 
     print(f"Pipeline run completed: {load_info}")
+
 
 # Run the pipeline if this script is executed directly
 if __name__ == "__main__":
