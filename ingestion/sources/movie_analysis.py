@@ -51,8 +51,8 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
 
     | Frequency Label | Definition | Example Descriptors in Parents Guide |
     | --- | --- | --- |
-    | Isolated | 1–2 brief or minor instances of violence/gore. | "One scene of blood," "a character is pushed," "a single gunshot" |
-    | Occasional | 3–5 scenes, or violence/gore is present but not central to the plot. | "Several scenes of blood," "some violent confrontations," "a few gory moments" |
+    | Isolated | 1-2 brief or minor instances of violence/gore. | "One scene of blood," "a character is pushed," "a single gunshot" |
+    | Occasional | 3-5 scenes, or violence/gore is present but not central to the plot. | "Several scenes of blood," "some violent confrontations," "a few gory moments" |
     | Frequent | 6+ scenes, or violence/gore is a recurring element. | "Many scenes of bloodshed," "repeated torture," "violence throughout the film" |
     | Pervasive | Violence/gore is constant, central to the plot, or described as overwhelming. | "Constant gore," "non-stop violence," "the entire film is filled with disturbing scenes" |
     """
