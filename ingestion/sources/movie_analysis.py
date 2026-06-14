@@ -5,10 +5,7 @@ from typing import Dict, Iterator
 import dlt
 import requests
 
-# Constants
 REQUEST_DELAY = 0.5  # Delay between API requests to avoid rate limiting
-
-# Function to send request to Mistral API
 
 
 def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
