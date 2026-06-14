@@ -35,10 +35,10 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
     # Define the prompt for the Mistral API
 
     prompt = f"""
-    Search the movie '{title}' released on {release_date} to determine the severity and frequency of its violence and gore content.
+    Web search the movie '{title}' released on {release_date} to determine the severity and frequency of its violence and gore content based on information available through reviews, articles and comments of the movie.
     Make sure that you match the film title and date in case there's more than one movie with the same date. If you cannot find any pertinent information on the movie then state that you are unable to find it. Ensure that you only use one label for severity and one label for frequency, shown in the tables below
 
-    For level of violence/gore use the following rating system. As an example in this system, Terrifier would be extreme, The Shining is high, and Lake Mungo would be mild.
+    For level of violence/gore use the following rating system. Ensure that only a single severity label is given. As an example in this system, Terrifier would be extreme, The Shining is high, and Lake Mungo would be mild.
 
     | Severity Label | Keywords/Descriptors | Example |
     | --- | --- | --- |
@@ -47,7 +47,7 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
     | High | Graphic injuries, mutilation, psychological | "A face is unrecognizably mutilated" |
     | Extreme | Dismemberment, torture, cannibalism, rituals | "Lungs pulled out through the back" |
 
-    For frequency of violence/gore use the following rating system. As an example in this system, Terrifier would be pervasive, The Shining is occasional, and Lake Mungo would be isolated.
+    For frequency of violence/gore use the following rating system. Ensure that only a single frequency label is given. As an example in this system, Terrifier would be pervasive, The Shining is occasional, and Lake Mungo would be isolated.
 
     | Frequency Label | Definition | Example Descriptors in Parents Guide |
     | --- | --- | --- |
@@ -85,7 +85,7 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
 
 def run_movie_analysis_pipeline() -> None:
     """
-    Main function to run the dlt pipeline that extracts movie data and sends requests to the Mistral API.
+    Main function to run the dlt pipeline that extracts movie data and sends requests to the Claude API.
 
     This function initializes the pipeline, defines the resources for movie data and violence/gore analysis,
     and runs the pipeline to process the data.
@@ -107,13 +107,17 @@ def run_movie_analysis_pipeline() -> None:
         """
         Resource to send requests to Claude API for violence/gore analysis.
         Processes movies in batches of specified size.
+
+        Parameters
+        ----------
+        batch_size : int
+            Maximum number of movies to process in single pipeline run.
         """
         # Get all movies from raw.movie_catalogue
         query = """
         SELECT title, release_date
         FROM raw.movie_catalogue
         """
-
         with pipeline.sql_client() as client:
             # Get all movies
             with client.execute_query(query) as cursor:
@@ -153,8 +157,3 @@ def run_movie_analysis_pipeline() -> None:
     load_info = pipeline.run([violence_gore_analysis()])
 
     print(f"Pipeline run completed: {load_info}")
-
-
-# Run the pipeline if this script is executed directly
-if __name__ == "__main__":
-    run_movie_analysis_pipeline()

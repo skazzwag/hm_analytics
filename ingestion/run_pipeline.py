@@ -45,6 +45,7 @@ import os
 import dlt
 from dotenv import load_dotenv
 
+from ingestion.sources.movie_analysis import run_movie_analysis_pipeline
 from ingestion.sources.omdb import omdb_static_source, omdb_temporal_source
 from ingestion.sources.tmdb import tmdb_static_source, tmdb_temporal_source
 
@@ -190,6 +191,11 @@ def main() -> None:
         """,
     )
     parser.add_argument(
+        "--analysis",
+        action="store_true",
+        help="Run movie analysis pipeline.",
+    )
+    parser.add_argument(
         "--static",
         action="store_true",
         help="Run static pipelines: TMDB details/keywords + OMDb metadata.",
@@ -220,18 +226,17 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(name)s — %(message)s",
     )
 
-    # Default to temporal when neither flag is provided (safe for daily scheduling)
-    run_static = args.static
-    run_temporal = args.temporal or not args.static
-
-    if run_static:
+    if args.static:
         run_tmdb_static(max_pages=args.max_pages)
         run_omdb_static()
 
-    if run_temporal:
+    if args.temporal:
         run_tmdb_temporal(max_pages=args.max_pages)
         run_omdb_temporal(batch_size=args.omdb_batch_size)
 
+    # Run analysis pipeline after tmdb/omdb pipelines if triggered
+    if args.analysis:
+        run_movie_analysis_pipeline()
 
 if __name__ == "__main__":
     main()
