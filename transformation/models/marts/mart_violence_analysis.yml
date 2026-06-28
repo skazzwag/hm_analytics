@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: mart_violence_analysis
+    description: "Mart model combining movie details, ratings, and violence/gore analysis to enable analysis of how violence/gore content affects horror movie reception. Grain is one row per movie."
+    columns:
+      - name: title
+        data_type: varchar
+        description: "Movie title"
+      - name: release_date
+        data_type: date
+        description: "Movie release date in YYYY-MM-DD format"
+      - name: original_language
+        data_type: varchar
+        description: "Original language code"
+      - name: budget
+        data_type: decimal(12, 2)
+        description: "Movie production budget"
+      - name: revenue
+        data_type: decimal(12, 2)
+        description: "Movie revenue"
+      - name: runtime
+        data_type: integer
+        description: "Runtime in minutes"
+      - name: us_certification
+        data_type: varchar
+        description: "US certification (MPAA rating)"
+      - name: genre_names
+        data_type: varchar[]
+        description: "Comma-separated genre names"
+      - name: overview
+        data_type: varchar
+        description: "Movie synopsis/overview"
+      - name: imdb_rating
+        data_type: integer
+        description: "IMDb rating converted to 0-100 scale"
+      - name: imdb_votes
+        data_type: integer
+        description: "IMDb number of votes"
+      - name: metascore_score
+        data_type: integer
+        description: "Metacritic score (0-100 scale)"
+      - name: rotten_tomatoes_score
+        data_type: integer
+        description: "Rotten Tomatoes score converted to 0-100 scale"
+      - name: box_office
+        data_type: decimal(12, 2)
+        description: "Box office revenue (text format)"
+      - name: severity
+        data_type: varchar
+        description: "Severity level of violence/gore. Extracted from model_response. Possible values: Mild, Moderate, High, Extreme, or NULL if not determined."
+      - name: frequency
+        data_type: varchar
+        description: "Frequency of violence/gore. Extracted from model_response. Possible values: Isolated, Occasional, Frequent, Pervasive, or NULL if not determined."
+      - name: model_response
+        data_type: varchar
+        description: "Raw response text from the Claude AI model containing violence/gore analysis"
+      - name: analysis_timestamp
+        data_type: timestamp
+        description: "When the violence/gore analysis was performed"
