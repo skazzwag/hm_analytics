@@ -1,0 +1,69 @@
+name: stg_movie_details
+description: "Staging model for detailed movie information from TMDB"
+columns:
+  - name: adult
+    data_type: boolean
+    description: "Adult content flag"
+  - name: backdrop_path
+    data_type: varchar
+    description: "Backdrop image path"
+  - name: budget
+    data_type: integer
+    description: "Movie budget"
+  - name: homepage
+    data_type: varchar
+    description: "Official website URL for the movie"
+  - name: id
+    data_type: integer
+    description: "TMDB movie ID"
+    tests:
+      - not_null
+      - unique
+  - name: imdb_id
+    data_type: varchar
+    description: "IMDb ID"
+  - name: original_language
+    data_type: varchar
+    description: "Original language" 
+  - name: original_title
+    data_type: varchar
+    description: "Original movie title" 
+  - name: overview
+    data_type: varchar 
+    description: "Movie overview"
+  - name: poster_path
+    data_type: varchar
+    description: "Poster image path"
+  - name: release_date
+    data_type: varchar
+    description: "Release date"
+  - name: revenue
+    data_type: integer
+    description: "Movie revenue"
+  - name: runtime
+    data_type: integer
+    description: "Runtime in minutes"
+  - name: status
+    data_type: varchar
+    description: "Release status"
+  - name: tagline
+    data_type: varchar
+    description: "Movie tagline"
+  - name: title
+    data_type: varchar
+    description: "Movie title"
+  - name: video
+    data_type: boolean
+    description: "Whether it contains video content"
+  - name: us_certification
+    data_type: varchar
+    description: "US certification (MPAA rating)"
+  - name: genre_names
+    data_type: varchar
+    description: "Comma-separated genre names"
+  - name: _dlt_load_id
+    data_type: varchar
+    description: "DLT load identifier"
+  - name: _dlt_id
+    data_type: varchar
+    description: "DLT unique identifier"
