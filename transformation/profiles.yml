@@ -1,15 +1,10 @@
 transformation:
   outputs:
-    dev:
-      type: duckdb
-      path: /home/zak/GitHub/hm_analytics/horror_movies.duckdb
-      threads: 1
-      schema: main
 
     prod:
       type: duckdb
-      path: /home/zak/GitHub/hm_analytics/horror_movies.duckdb
+      schema: transformation
       threads: 4
-      schema: main
+      path: "md:horror_movies?motherduck_token={{ env_var('MOTHERDUCK_PROD_TOKEN') }}"
 
-  target: dev
+  target: prod

@@ -1,0 +1,45 @@
+name: stg_omdb_metadata
+description: "Staging model for OMDb metadata"
+columns:
+  - name: tmdb_id
+    data_type: integer
+    description: "TMDB movie ID"
+    tests:
+      - not_null
+  - name: imdb_id
+    data_type: varchat
+    description: "IMDb ID"
+  - name: title
+    data_type: varchar
+    description: "Movie title"
+  - name: year
+    data_type: varchar
+    description: "Release year"
+  - name: rated
+    data_type: varchar
+    description: "MPAA rating"
+  - name: runtime
+    data_type: varchar
+    description: "Runtime"
+  - name: director
+    data_type: varchar
+    description: "Director name"
+  - name: writer
+    data_type: varchar
+    description: "Writer name"
+  - name: actors
+    data_type: varchar
+    description: "Main actors"
+  - name: plot
+    data_type: varchar
+    description: "Movie plot"
+  - name: awards
+    data_type: varchar
+    description: "Awards information"
+  - name: dvd
+    data_type: varchar
+    description: "DVD release date"
+  - name: _dlt_load_id
+    description: "DLT load identifier"
+  - name: _dlt_id
+    description: "DLT unique identifier"

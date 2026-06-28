@@ -6,16 +6,16 @@
 }}
 
 SELECT
-    id,
-    title,
-    original_title,
-    release_date,
-    original_language,
     adult,
-    video,
     backdrop_path,
-    poster_path,
+    id,
+    original_language,
+    original_title,
     overview,
-    _dlt_load_id,
+    poster_path,
+    release_date,
+    title,
+    video,
+    _dlt_load_id
     _dlt_id
 FROM {{ source('horror_movies', 'movie_catalogue') }}
