@@ -54,7 +54,8 @@ For the MotherDuck remote MCP with Opencode run `opencode mcp auth motherduck` t
 Get a free TMDB API key at [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api).  
 Get a free OMDb API key at [omdbapi.com/apikey](https://www.omdbapi.com/apikey.aspx).
 
-
+This repo has been set up with `direnv` such that entering the root directory of this repo will effectively run `source .env`. For this to work, 
+ensure that you have `direnv` installed, the `eval "$(direnv hook bash)"` added to your `.bashrc` or equivalent, and `direnv allow` has been run in the repo root.
 
 ### 3. Run the pipeline
 
