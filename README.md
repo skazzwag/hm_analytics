@@ -4,6 +4,8 @@ Analytics project studying the effect of violence and gore on horror movie recep
 
 Data is ingested from [TMDB](https://www.themoviedb.org/) and [OMDb](https://www.omdbapi.com/) into a DuckDB database using [dlt](https://dlthub.com/). Future sections will add dbt Core transformations and marimo visualisations.
 
+`opencode mcp auth motherduck`
+
 ## Project Structure
 
 ```
@@ -30,15 +32,29 @@ uv sync
 
 ### 2. Configure secrets
 
-Add your API keys to `.env`:
+Ensure you have the following environment variables set:
 
 ```
-SOURCES__TMDB__API_KEY=your_tmdb_api_key
-SOURCES__OMDB__API_KEY=your_omdb_api_key
+# For ingestion pipelines
+SOURCES__TMDB__API_KEY=...
+SOURCES__OMDB__API_KEY=...
+DESTINATION__MOTHERDUCK__CREDENTIALS="md:///horror_movies?motherduck_token=..."
+ANTHROPIC_API_KEY=...
+
+# For dbt pipelines
+MOTHERDUCK_PROD_TOKEN=...
+
+# For MCP assistance
+HM_ANALYTICS_DBT_PROJECT_DIR="{repo_root_path}/transformation"
+HM_ANALYTICS_DBT_PAT="{repo_root_path}/.venv/bin/dbt"
 ```
+
+For the MotherDuck remote MCP with Opencode run `opencode mcp auth motherduck` to authenticate.
 
 Get a free TMDB API key at [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api).  
 Get a free OMDb API key at [omdbapi.com/apikey](https://www.omdbapi.com/apikey.aspx).
+
+
 
 ### 3. Run the pipeline
 
