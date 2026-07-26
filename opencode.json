@@ -1,0 +1,32 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "mcp": {
+        "motherduck": {
+            "url": "https://api.motherduck.com/mcp",
+            "type": "remote",
+            "enabled": true
+        },
+        "dlt-workspace-mcp": {
+            "command": [
+                "uv",
+                "run",
+                "dlt",
+                "ai",
+                "mcp",
+                "--stdio"
+            ],
+            "type": "local",
+            "enabled": true
+        },
+        "dbt": {
+            "command": ["uv", "run" , "dbt-mcp"],
+            "enabled": true,
+            "environment": {
+                "DBT_PROJECT_DIR": "{env:HM_ANALYTICS_DBT_PROJECT_DIR}",
+                "DBT_PATH": "{env:HM_ANALYTICS_DBT_PATH}",
+                "MOTHERDUCK_PROD_TOKEN": "{env:MOTHERDUCK_PROD_TOKEN}"
+            },
+            "type": "local"
+        }    
+    }
+}
