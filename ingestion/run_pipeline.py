@@ -1,45 +1,12 @@
-"""
-Horror movie ingestion pipeline — production runner.
-
-TMDB: discover all movies, fetch full details and keywords.
-OMDb: fetch static metadata (cast, crew, plot, MPAA rating).
-
-
-Usage
------
-Run from the repo root so that both Python imports and dlt config resolution
-(which uses cwd to locate ``.dlt/``) work correctly::
-
-    uv run run-ingestion                        # default params
-    uv run run-ingestion --max-pages 5          # limit discover pages
-    uv run run-ingestion --omdb-batch-size 400  # smaller OMDb batch
-
-Destination
------------
-Defaults to a local DuckDB file (``horror_movies.duckdb``). Set the
-``PIPELINE_DESTINATION`` environment variable to ``motherduck`` to write
-to MotherDuck, which also requires ``DESTINATION__MOTHERDUCK__CREDENTIALS``
-in the environment.
-
-Secrets (resolved from ``.env``)
----------------------------------
-    SOURCES__TMDB__API_KEY
-    SOURCES__OMDB__API_KEY
-    DESTINATION__MOTHERDUCK__CREDENTIALS  (MotherDuck only)
-"""
-
 import argparse
 import logging
 import os
 
 import dlt
-from dotenv import load_dotenv
 
 from ingestion.sources.movie_analysis import run_movie_analysis_pipeline
 from ingestion.sources.omdb import omdb_static_source, omdb_temporal_source
 from ingestion.sources.tmdb import tmdb_static_source, tmdb_temporal_source
-
-load_dotenv()
 
 PIPELINE_NAME = "horror_movies"
 DATASET_NAME = "raw"
@@ -76,9 +43,9 @@ def get_movies() -> list[dict]:
             return [dict(zip(cols, row)) for row in cursor.fetchall()]
 
 
-def run_tmdb_static(max_pages: int) -> None:
+def run_tmdb_pipeline(max_pages: int) -> None:
     """
-    Run the TMDB static pipeline.
+    Run the TMDB ingestion pipeline.
 
     Fetches the movie catalogue, full details, and keywords. Paginates the
     discover endpoint once and shares IDs across all three resources.
@@ -97,30 +64,9 @@ def run_tmdb_static(max_pages: int) -> None:
     logger.info("TMDB static complete: %s", load_info)
 
 
-def run_tmdb_temporal(max_pages: int) -> None:
+def run_omdb_pipeline() -> None:
     """
-    Run the TMDB temporal pipeline.
-
-    Fetches only the discover endpoint and appends a popularity/vote snapshot.
-    Approximately ``max_pages`` API requests.
-
-    Parameters
-    ----------
-    max_pages : int
-        Maximum number of discover pages to fetch (20 movies per page).
-    """
-    logger.info("Running TMDB temporal pipeline (max_pages=%d)...", max_pages)
-    load_info = dlt.pipeline(
-        pipeline_name=PIPELINE_NAME,
-        destination=DESTINATION,
-        dataset_name=DATASET_NAME,
-    ).run(tmdb_temporal_source(max_pages=max_pages))
-    logger.info("TMDB temporal complete: %s", load_info)
-
-
-def run_omdb_static() -> None:
-    """
-    Run the OMDb static pipeline.
+    Run the OMDb ingestion pipeline.
 
     Reads the full movie catalogue and fetches static metadata (cast, crew,
     plot, MPAA rating) for every movie. Uses one OMDb request per movie —
@@ -134,35 +80,6 @@ def run_omdb_static() -> None:
         dataset_name=DATASET_NAME,
     ).run(omdb_static_source().omdb_metadata(movies=movies))
     logger.info("OMDb static complete: %s", load_info)
-
-
-def run_omdb_temporal(batch_size: int) -> None:
-    """
-    Run the OMDb temporal pipeline.
-
-    Reads the full movie catalogue and processes a batch of ``batch_size``
-    movies starting from a persistent cursor. The cursor advances each run
-    and resets to 0 after the full list has been covered, cycling through
-    the corpus over multiple days.
-
-    Parameters
-    ----------
-    batch_size : int
-        Number of movies to score per run. Keep at or below ~900 to stay
-        within OMDb's 1,000 requests/day free tier.
-    """
-    movies = get_movies()
-    logger.info(
-        "Running OMDb temporal pipeline (%d movies, batch_size=%d)...",
-        len(movies),
-        batch_size,
-    )
-    load_info = dlt.pipeline(
-        pipeline_name=PIPELINE_NAME,
-        destination=DESTINATION,
-        dataset_name=DATASET_NAME,
-    ).run(omdb_temporal_source(batch_size=batch_size).omdb_scores(movies=movies))
-    logger.info("OMDb temporal complete: %s", load_info)
 
 
 def main() -> None:
@@ -196,8 +113,8 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(name)s — %(message)s",
     )
 
-    run_tmdb_static(max_pages=args.max_pages)
-    run_omdb_static()
+    run_tmdb_pipeline(max_pages=args.max_pages)
+    run_omdb_pipeline()
     run_movie_analysis_pipeline()
 
 
