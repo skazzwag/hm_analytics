@@ -2,7 +2,7 @@
 
 Analytics project studying the effect of violence and gore on horror movie reception.
 
-Data is ingested from [TMDB](https://www.themoviedb.org/) and [OMDb](https://www.omdbapi.com/) into a DuckDB database using [dlt](https://dlthub.com/). Future sections will add dbt Core transformations and marimo visualisations.
+Data is ingested from [TMDB](https://www.themoviedb.org/) and [OMDb](https://www.omdbapi.com/) into a DuckDB/MotherDuck database using [dlt](https://dlthub.com/). Classifications on the level of violence and gore in the horror movies are determined through sending a prompt to the Anthropic API to search for reviews and info about the movie, which is also handled as a custom dlt pipeline. The 
 
 ## Project Structure
 
@@ -10,10 +10,10 @@ Data is ingested from [TMDB](https://www.themoviedb.org/) and [OMDb](https://www
 hm_analytics/
 ├── ingestion/                  # dlt ingestion pipelines
 │   ├── sources/
-│   │   ├── tmdb.py             # TMDB sources (static + temporal)
-│   │   └── omdb.py             # OMDb sources (static + temporal)
-│   ├── run_pipeline.py         # Production pipeline runner
-│   └── explore.py              # Marimo notebook for post-load inspection
+│   │   ├── tmdb.py             # TMDB source
+│   │   ├── omdb.py             # OMDB sources
+│   │   └── movie_analysis.py   # Athropic LLM results source
+│   └── run_pipeline.py         # Production pipeline runner
 ├── transformation/             # dbt Core transformations (coming soon)
 ├── visualisation/              # Marimo analysis notebooks (coming soon)
 └── .dlt/
@@ -30,39 +30,35 @@ uv sync
 
 ### 2. Configure secrets
 
-Add your API keys to `.env`:
+Ensure you have the following environment variables set:
 
 ```
-SOURCES__TMDB__API_KEY=your_tmdb_api_key
-SOURCES__OMDB__API_KEY=your_omdb_api_key
+# For ingestion pipelines
+SOURCES__TMDB__API_KEY=...
+SOURCES__OMDB__API_KEY=...
+DESTINATION__MOTHERDUCK__CREDENTIALS="md:///horror_movies?motherduck_token=..."
+ANTHROPIC_API_KEY=...
+
+# For dbt pipelines
+MOTHERDUCK_PROD_TOKEN=...
+
+# For MCP assistance
+HM_ANALYTICS_DBT_PROJECT_DIR="{repo_root_path}/transformation"
+HM_ANALYTICS_DBT_PAT="{repo_root_path}/.venv/bin/dbt"
 ```
+
+For the MotherDuck remote MCP with Opencode run `opencode mcp auth motherduck` to authenticate.
 
 Get a free TMDB API key at [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api).  
 Get a free OMDb API key at [omdbapi.com/apikey](https://www.omdbapi.com/apikey.aspx).
 
+This repo has been set up with `direnv` such that entering the root directory of this repo will effectively run `source .env`. For this to work, 
+ensure that you have `direnv` installed, the `eval "$(direnv hook bash)"` added to your `.bashrc` or equivalent, and `direnv allow` has been run in the repo root.
+
 ### 3. Run the pipeline
 
 ```bash
-# First-time setup — run everything
-uv run run-ingestion --static --temporal
-
-# Daily temporal run (default) — popularity snapshots + OMDb score batch
-uv run run-ingestion
-
-# Weekly static run — new releases, full details, keywords, OMDb metadata
-uv run run-ingestion --static
-
-# Limit discover pages for a quick test (20 movies/page)
-uv run run-ingestion --max-pages 5
-
-# Reduce OMDb batch size if approaching the 1,000 req/day limit
-uv run run-ingestion --omdb-batch-size 400
-```
-
-### 4. Explore the data
-
-```bash
-uv run marimo run ingestion/explore.py
+uv run ingestion/run_pipeline.py
 ```
 
 ---
@@ -101,7 +97,7 @@ All tables sit in the `raw` schema. Static tables use merge disposition (upsert)
 
 API: `https://api.themoviedb.org/3` · Horror genre ID: 27 · Rate limit: ~4 req/sec
 
-#### `raw.movie_catalogue` — static, merge
+#### `raw.movie_catalogue`
 
 One row per horror movie. Static fields from the discover endpoint.
 
@@ -119,7 +115,7 @@ One row per horror movie. Static fields from the discover endpoint.
 | `backdrop_path` | string | Relative path to backdrop image |
 | `genre_ids` | list | TMDB genre ID list |
 
-#### `raw.movie_details` — static, merge
+#### `raw.movie_details`
 
 One row per horror movie. Full metadata from `/movie/{id}`, static fields only.
 
@@ -142,7 +138,7 @@ One row per horror movie. Full metadata from `/movie/{id}`, static fields only.
 | `original_language` | string | ISO 639-1 language code |
 | `adult` | boolean | Adult content flag |
 
-#### `raw.movie_keywords` — static, merge
+#### `raw.movie_keywords`
 
 Normalised keyword associations, one row per (movie, keyword) pair.
 
@@ -152,7 +148,7 @@ Normalised keyword associations, one row per (movie, keyword) pair.
 | `keyword_id` | integer | TMDB keyword ID (composite primary key) |
 | `keyword_name` | string | Keyword text (lowercased) |
 
-#### `raw.movie_popularity` — temporal, append
+#### `raw.movie_popularity`
 
 One row per movie per pipeline run. Popularity and vote metrics from the discover endpoint.
 
@@ -172,7 +168,7 @@ API: `http://www.omdbapi.com/` · Lookup: by title + release year · Rate limit:
 
 Movies not found on OMDb are silently skipped. The free tier is shared across both static and temporal pipelines — plan runs accordingly.
 
-#### `raw.omdb_metadata` — static, merge
+#### `raw.omdb_metadata`
 
 One row per matched movie. Cast, crew, and descriptive metadata.
 
@@ -191,7 +187,7 @@ One row per matched movie. Cast, crew, and descriptive metadata.
 | `awards` | string | Awards and nominations summary |
 | `dvd` | string | DVD release date |
 
-#### `raw.omdb_scores` — temporal, append
+#### `raw.omdb_scores`
 
 One row per matched movie per pipeline run. Aggregated review scores.
 

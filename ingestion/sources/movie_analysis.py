@@ -1,6 +1,5 @@
-import os
 from datetime import datetime, timezone
-from typing import Dict, Iterator
+from typing import Iterator
 
 import dlt
 import requests
@@ -8,7 +7,9 @@ import requests
 REQUEST_DELAY = 0.5  # Delay between API requests to avoid rate limiting
 
 
-def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
+def get_violence_gore_analysis(
+    title: str, release_date: str, api_key: str, base_url: str,
+) -> dict:
     """
     Send a request to the Mistral API to get violence/gore severity and frequency.
 
@@ -21,7 +22,7 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
 
     Returns
     -------
-    Dict
+    dict
         A dictionary containing the violence/gore analysis results.
 
     Raises
@@ -29,8 +30,6 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
     requests.HTTPError
         If the API request fails.
     """
-    # Define the prompt for the Mistral API
-
     prompt = f"""
     Web search the movie '{title}' released on {release_date} to determine the severity and frequency of its violence and gore content based on information available through reviews, articles and comments of the movie.
     Make sure that you match the film title and date in case there's more than one movie with the same date. If you cannot find any pertinent information on the movie then state that you are unable to find it. Ensure that you only use one label for severity and one label for frequency, shown in the tables below
@@ -53,9 +52,12 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
     | Frequent | 6+ scenes, or violence/gore is a recurring element. | "Many scenes of bloodshed," "repeated torture," "violence throughout the film" |
     | Pervasive | Violence/gore is constant, central to the plot, or described as overwhelming. | "Constant gore," "non-stop violence," "the entire film is filled with disturbing scenes" |
     """
+    
+    if not api_key:
+        raise ValueError("ANTHROPIC_API_KEY environment variable is not set")
 
     # API endpoint and parameters
-    url = "https://api.anthropic.com/v1/messages"
+    url = f"{base_url}/messages"
     params = {
         "model": "claude-sonnet-4-6",
         "max_tokens": 1024,
@@ -63,7 +65,7 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
     }
 
     headers = {
-        "x-api-key": os.environ["ANTHROPIC_API_KEY"],
+        "x-api-key": api_key,
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
     }
@@ -74,18 +76,32 @@ def get_violence_gore_analysis(title: str, release_date: str) -> Dict:
 
     # Extract and return the response content
     response_data = response.json()
+    if not response_data.get("content") or not response_data["content"]:
+        raise ValueError("Unexpected API response structure: missing 'content' field")
+
     return response_data["content"][0]["text"]
 
 
-# Main pipeline function
-
-
-def run_movie_analysis_pipeline() -> None:
+@dlt.source(name="anthropic")
+def run_movie_analysis_pipeline(
+    api_key: str = dlt.secrets.value,
+    base_url: str = dlt.config.value,
+    batch_size: int = 300,
+) -> None:
     """
-    Main function to run the dlt pipeline that extracts movie data and sends requests to the Claude API.
+    Main function to run the dlt pipeline that extracts movie data and sends requests to the Anthropic API.
 
     This function initializes the pipeline, defines the resources for movie data and violence/gore analysis,
     and runs the pipeline to process the data.
+
+    Parameters
+    ----------
+    api_key : str
+        Anthropic API key. Resolved from env var ``SOURCES__ANTHROPIC__API_KEY``.
+    base_url : str
+        Anthropic API base URL. Resolved from ``.dlt/config.toml``.
+    batch_size : int
+        Maximum number of movies to process in a single pipeline run.
 
     Returns
     -------
@@ -100,15 +116,9 @@ def run_movie_analysis_pipeline() -> None:
 
     # Define the resource for violence/gore analysis
     @dlt.resource(name="violence_gore_analysis", write_disposition="append")
-    def violence_gore_analysis(batch_size: int = 300) -> Iterator[Dict]:
+    def violence_gore_analysis() -> Iterator[dict]:
         """
-        Resource to send requests to Claude API for violence/gore analysis.
-        Processes movies in batches of specified size.
-
-        Parameters
-        ----------
-        batch_size : int
-            Maximum number of movies to process in single pipeline run.
+        Resource to send requests to Anthropic API for violence/gore analysis.
         """
         # Get all movies from raw.movie_catalogue
         query = """
@@ -129,8 +139,10 @@ def run_movie_analysis_pipeline() -> None:
                 """
                 with client.execute_query(processed_query) as cursor:
                     processed_movies = {(row[0], row[1]) for row in cursor.fetchall()}
-            except:
-                pass  # Table doesn't exist yet, so no movies processed
+            except Exception as e:
+                pipeline.logger.warning(
+                    f"Table doesn't exist yet, so no movies processed: {e}"
+                )
 
             # Get unprocessed movies and limit to batch size
             unprocessed_movies = all_movies - processed_movies
@@ -138,7 +150,9 @@ def run_movie_analysis_pipeline() -> None:
             # Process first batch_size movies
             for title, release_date in list(unprocessed_movies)[:batch_size]:
                 try:
-                    analysis = get_violence_gore_analysis(title, release_date)
+                    analysis = get_violence_gore_analysis(
+                        title, release_date, api_key, base_url
+                    )
                     yield {
                         "title": title,
                         "release_date": release_date,
@@ -147,10 +161,12 @@ def run_movie_analysis_pipeline() -> None:
                         "timestamp": datetime.now(timezone.utc),
                     }
                 except Exception as e:
-                    print(f"Error analyzing movie {title}: {e}")
+                    pipeline.logger.error(
+                        f"Error analyzing movie {title}: {e}"
+                    )
                     continue
 
-    # Run the pipeline
-    load_info = pipeline.run([violence_gore_analysis()])
+     # Run the pipeline
+     load_info = pipeline.run([violence_gore_analysis()])
 
-    print(f"Pipeline run completed: {load_info}")
+     pipeline.logger.info(f"Pipeline run completed: {load_info}")

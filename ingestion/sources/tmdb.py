@@ -36,7 +36,7 @@ REQUEST_DELAY = 0.25  # TMDB allows ~4 requests/sec
 _TEMPORAL_DETAIL_FIELDS = {"popularity", "vote_average", "vote_count"}
 
 
-def _tmdb_get(
+def tmdb_get(
     base_url: str,
     path: str,
     api_key: str,
@@ -74,7 +74,7 @@ def _tmdb_get(
     return response.json()
 
 
-def _paginate_discover(base_url: str, api_key: str, max_pages: int) -> list[dict]:
+def paginate_discover(base_url: str, api_key: str, max_pages: int) -> list[dict]:
     """
     Paginate the TMDB discover endpoint and return all results as a list.
 
@@ -99,7 +99,7 @@ def _paginate_discover(base_url: str, api_key: str, max_pages: int) -> list[dict
     movies: list[dict] = []
     page = 1
     while page <= max_pages:
-        data = _tmdb_get(
+        data = tmdb_get(
             base_url,
             "/discover/movie",
             api_key,
@@ -143,7 +143,7 @@ def tmdb_static_source(
     max_pages : int, optional
         Discover pages to fetch (20 movies per page). Default is 25.
     """
-    movies = _paginate_discover(base_url, api_key, max_pages)
+    movies = paginate_discover(base_url, api_key, max_pages)
     movie_ids = [m["id"] for m in movies]
 
     @dlt.resource(
@@ -170,7 +170,7 @@ def tmdb_static_source(
         temporal metrics and deeply nested objects that do not load cleanly.
         """
         for movie_id in movie_ids:
-            details = _tmdb_get(
+            details = tmdb_get(
                 base_url,
                 f"/movie/{movie_id}",
                 api_key,
@@ -217,7 +217,7 @@ def tmdb_static_source(
     def movie_keywords() -> Iterator[TDataItems]:
         """Yield normalised keyword associations (one row per movie/keyword pair)."""
         for movie_id in movie_ids:
-            kw_data = _tmdb_get(
+            kw_data = tmdb_get(
                 base_url,
                 f"/movie/{movie_id}/keywords",
                 api_key,
