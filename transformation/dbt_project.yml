@@ -41,11 +41,6 @@ models:
       +materialized: table
       +docs:
         node_color: "#efbf04"
-    5_activation:
-      +schema: "{{ 'dbt_act' if target.name == 'prod' else target.schema}}"
-      +materialized: table
-      +docs:
-        node_color: "#efbf04"
     utils:
       +schema: "{{ 'dbt_stg' if target.name == 'prod' else target.schema}}"
       +materialized: table
