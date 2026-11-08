@@ -1,0 +1,151 @@
+files: transformation/
+
+default_language_version:
+  python: python3.12
+
+repos:
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: no-commit-to-branch
+        name: Don't allow commits to the main branch
+        args: ["--branch", "main"]
+      - id: trailing-whitespace
+        name: Remove trailing whitespace
+      - id: end-of-file-fixer
+        name: Ensure files end with a newline character
+      - id: mixed-line-ending
+        name: Align mixed line ending
+      - id: check-added-large-files
+        name: Check for large files
+      - id: check-json
+        name: Check JSON files are valid and parseable
+      - id: check-toml
+        name: Check TOML files are valid and parseable
+      - id: check-yaml
+        name: Check YAML files are valid and parseable
+      - id: check-case-conflict
+        name: Check for case conflicts in filenames
+      - id: check-merge-conflict
+        name: Check for merge conflict markers
+      - id: detect-private-key
+        name: Detect private keys
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.8.2
+    hooks:
+      - id: uv-lock
+        name: Check that the lock file is up-to-date
+
+  - repo: https://github.com/dbt-checkpoint/dbt-checkpoint
+    rev: v2.0.6
+    hooks:
+    - id: dbt-deps
+      description: Install required dbt packages
+      additional_dependencies: &dbt-deps ['dbt-core>=1.10.13', 'dbt-duckdb>=1.9.6', 'python-dotenv[cli]>=1.1.0', 'duckdb<1.5.0']
+
+    - id: dbt-parse
+      entry: dotenv run -- dbt parse --profiles-dir transformation --project-dir transformation
+      description: required to generate manifest.json for the hooks to work
+      additional_dependencies: *dbt-deps
+      files: &transformation-dir ^transformation/
+
+    - id: dbt-docs-generate
+      entry: dotenv run -- dbt docs generate --profiles-dir transformation --project-dir transformation --no-compile
+      description: checks if dbt docs generate works
+      additional_dependencies: *dbt-deps
+      files: *transformation-dir
+
+    - id: check-script-semicolon
+      name: Check script don't end with a semicolon
+      files: *transformation-dir
+    - id: check-script-has-no-table-name
+      args: [--ignore-dotless-table]
+      name: Check script has no hardcoded table names
+      files: *transformation-dir
+    - id: check-script-ref-and-source
+      name: Check script uses ref() or source() functions
+      files: *transformation-dir
+
+    - id: check-model-has-properties-file
+      description: checks if the model exists in a yaml file
+      files: ^transformation/models/
+    - id: check-model-has-description
+      description: checks if model has a description
+      files: ^transformation/models/
+    - id: check-model-name-contract
+      description: checks if all models in /1_staging/ starts with `base_` or `stg_`
+      args: [--pattern, "(base_|stg_).*"]
+      files: ^transformation/models/1_staging/
+    - id: check-model-name-contract
+      description: checks if all models in /2_intermediate/ start with `int_`
+      args: [--pattern, "(int_).*"]
+      files: ^transformation/models/2_intermediate/
+    - id: check-model-name-contract
+      description: checks if all models in /3_domain/ start with `dmn_`
+      args: [--pattern, "(dmn_).*"]
+      files: ^transformation/models/3_domain/
+    - id: check-model-name-contract
+      description: checks if all models in /4_presentation/ start with `prs_`
+      args: [--pattern, "(prs_).*"]
+      files: ^transformation/models/4_presentation/
+    - id: check-model-name-contract
+      description: checks if all models in /5_activation/ start with `act_`
+      args: [--pattern, "(act_).*"]
+      files: ^transformation/models/5_activation/
+    - id: check-model-name-contract
+      description: checks if all models in /utils/ start with `utils_`
+      args: [--pattern, "(utils_).*"]
+      files: ^transformation/models/utils/
+
+    - id: check-model-has-all-columns
+      name: Check model has all columns in the YAML file
+      args: ["--manifest", "transformation/target/manifest.json", "--"]
+      files: *transformation-dir
+      exclude: ^transformation/models/6_access/
+
+    - id: check-model-columns-have-desc
+      name: Check columns have a description
+      files: *transformation-dir
+    - id: check-column-name-contract
+      name: Check boolean column name convention
+      args: [--pattern, "(is|has|do)_.*", --dtypes, boolean]
+      files: *transformation-dir
+
+    - id: check-model-has-tests-by-group
+      description: checks if each model has at least a primary key test
+      args: ["--tests", "unique", "unique_combination_of_columns", "--test-cnt", "1", "--",]
+      files: *transformation-dir
+
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 4.3.0
+    hooks:
+    - id: sqlfluff-fix
+      description: fixes all SQL files
+      entry: dotenv run -- sqlfluff fix --config transformation/.sqlfluff
+      additional_dependencies : ['dbt-duckdb>=1.9.6', 'sqlfluff-templater-dbt', 'python-dotenv[cli]>=1.1.0', 'duckdb<1.5.0']
+      files: *transformation-dir
+      exclude: |
+        (?x)^(
+            \.venv/.*|
+            transformation/target/.*|
+            transformation/dbt_packages/.*|
+            transformation/macros/.*|
+            transformation/tests/generic/.*
+        )$
+
+  - repo: local
+    hooks:
+      - id: check-model-columns-have-data-types
+        name: Check model columns have data types
+        entry: uv run python tools/check_model_column_data_types.py
+        language: system
+        files: ^transformation/models/.*\.ya?ml$
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.2.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []

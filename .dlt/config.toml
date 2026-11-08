@@ -1,5 +1,20 @@
 # Non-secret configuration values for the horror movie analytics pipeline.
 
+[runtime]
+log_level = "INFO"
+dlthub_telemetry = false
+
+[extract]
+workers = 2
+max_parallel_items = 4
+
+[normalize]
+workers = 1
+start_method = "spawn"
+
+[load]
+workers = 1
+
 [sources.tmdb]
 base_url = "https://api.themoviedb.org/3"
 

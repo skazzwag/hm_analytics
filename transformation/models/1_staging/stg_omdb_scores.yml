@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: stg_omdb_scores
+    description: "Staging model for OMDb scores"
+    columns:
+      - name: scraped_at
+        data_type: timestamp
+        description: "Timestamp of the pipeline run"
+      - name: tmdb_id
+        data_type: integer
+        description: "TMDB movie ID"
+        data_tests:
+          - not_null
+      - name: imdb_id
+        data_type: varchar
+        description: "IMDb ID"
+      - name: imdb_rating
+        data_type: varchar
+        description: "IMDb rating"
+      - name: imdb_votes
+        data_type: varchar
+        description: "IMDb votes count"
+      - name: metascore
+        data_type: varchar
+        description: "Metacritic score"
+      - name: rotten_tomatoes_score
+        data_type: varchar
+        description: "Rotten Tomatoes score"
+      - name: metacritic_score
+        data_type: varchar
+        description: "Metacritic score (parsed)"
+      - name: box_office
+        data_type: varchar
+        description: "Box office revenue"
+      - name: _dlt_load_id
+        data_type: varchar
+        description: "DLT load identifier"
+      - name: _dlt_id
+        data_type: varchar
+        description: "DLT unique identifier"

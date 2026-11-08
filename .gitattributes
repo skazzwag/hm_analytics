@@ -1,0 +1,5 @@
+# Normalise line endings: every text file is committed and checked out
+# with LF, regardless of the contributor's OS or editor.
+# text=auto lets git auto-detect binary files and leave them untouched,
+# so images, Parquet files, and DuckDB databases are never mangled.
+* text=auto eol=lf

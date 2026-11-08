@@ -1,0 +1,23 @@
+# Environments
+.env
+.envrc
+.venv/
+
+# IDE and system files
+.vscode/
+.idea/
+.DS_Store
+
+# dbt
+**/target/
+**/dbt_modules/
+**/dbt_packages/
+**/logs/
+**/.user.yml
+
+# dlt
+.dlt/secrets.toml
+ingestion/defs/.local_defs_state/
+
+# Dagster
+.tmp_dagster_home*/

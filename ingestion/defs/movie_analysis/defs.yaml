@@ -1,0 +1,8 @@
+type: dagster_dlt.DltLoadCollectionComponent
+
+attributes:
+  loads:
+    - source: .loads.movie_analysis_load_source
+      pipeline: .loads.movie_analysis_pipeline
+      translation:
+        group_name: "movie_analysis"

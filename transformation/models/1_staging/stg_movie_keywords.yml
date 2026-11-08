@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: stg_movie_keywords
+    description: "Staging model for movie keywords from TMDB"
+    columns:
+      - name: movie_id
+        data_type: integer
+        description: "TMDB movie ID"
+        data_tests:
+          - not_null
+      - name: keyword_id
+        data_type: integer
+        description: "Keyword ID"
+        data_tests:
+          - not_null
+      - name: keyword_name
+        data_type: varchar
+        description: "Keyword name"
+      - name: _dlt_load_id
+        data_type: varchar
+        description: "DLT load identifier"
+      - name: _dlt_id
+        data_type: varchar
+        description: "DLT unique identifier"

@@ -1,42 +1,69 @@
-
-# Name your project! Project names should contain only lowercase characters
-# and underscores. A good package name should reflect your organization's
-# name or the intended use of these models
-name: 'transformation'
+name: 'horror_transforms'
 version: '1.0.0'
+config-version: 2
 
-# This setting configures which "profile" dbt uses for this project.
-profile: 'transformation'
+profile: 'horror_analytics'
 
-# These configurations specify where dbt should look for different types of files.
-# The `model-paths` config, for example, states that models in this project can be
-# found in the "models/" directory. You probably won't need to change these!
+require-dbt-version: '>=1.10.13'
+
 model-paths: ["models"]
-analysis-paths: ["analyses"]
+analysis-paths: ["analysis"]
 test-paths: ["tests"]
-seed-paths: ["seeds"]
+seed-paths: ["data"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
-
-clean-targets:         # directories to be removed by `dbt clean`
+clean-targets:
   - "target"
   - "dbt_packages"
 
-
-# Configuring models
-# Full documentation: https://docs.getdbt.com/docs/configuring-models
-
-# In this example config, we tell dbt to build all models in the example/
-# directory as views. These settings can be overridden in the individual model
-# files using the `{{ config(...) }}` macro.
 models:
-  transformation:
-    # Config indicated by + and applies to all files under models/example/
-    example:
-      +materialized: view
-    staging:
+  +sql_header: "set TimeZone='UTC';"
+  horror_transforms:
+    +persist_docs:
+      relation: true
+      columns: true
+    1_staging:
+      +tags: ["stg"]
+      +schema: "{{ 'dbt_stg' if target.name == 'prod' else target.schema}}"
       +materialized: table
-      +schema: staging
-    marts:
+      +docs:
+        node_color: "#cd7f32"
+    2_intermediate:
+      +schema: "{{ 'dbt_int' if target.name == 'prod' else target.schema}}"
       +materialized: table
-      +schema: marts
+    3_domain:
+      +schema: "{{ 'dbt_dmn' if target.name == 'prod' else target.schema}}"
+      +materialized: table
+      +docs:
+        node_color: "#c0c0c0"
+    4_presentation:
+      +schema: "{{ 'dbt_prs' if target.name == 'prod' else target.schema}}"
+      +materialized: table
+      +docs:
+        node_color: "#efbf04"
+    5_activation:
+      +schema: "{{ 'dbt_act' if target.name == 'prod' else target.schema}}"
+      +materialized: table
+      +docs:
+        node_color: "#efbf04"
+    utils:
+      +schema: "{{ 'dbt_stg' if target.name == 'prod' else target.schema}}"
+      +materialized: table
+
+seeds:
+  +schema: "{{ 'dbt_seed' if target.name == 'prod' else target.schema}}"
+
+tests:
+  +store_failures: "{{ target.name == 'prod' }}"
+
+dispatch:
+  - macro_namespace: dbt
+    search_order:
+      - horror_transforms
+      - dbt
+
+flags:
+  require_explicit_package_overrides_for_builtin_materializations: false
+  source_freshness_run_project_hooks: true
+  send_anonymous_usage_stats: false
+  require_generic_test_arguments_property: true

@@ -1,0 +1,286 @@
+version: 2
+
+sources:
+  - name: horror_movies
+    description: >
+      Raw horror-movie data loaded by dlt into the `raw` schema of the
+      `horror_movies` database. Populated by the TMDB, OMDb, and Anthropic
+      analysis ingestion pipelines.
+    database: horror_movies
+    schema: raw
+    tables:
+      - name: movie_catalogue
+        description: >
+          One row per horror movie. Static fields from the TMDB discover
+          endpoint; merged (upsert) on each run.
+        columns:
+          - name: id
+            data_type: integer
+            description: TMDB movie ID (primary key)
+          - name: title
+            data_type: varchar
+            description: Release title
+          - name: original_title
+            data_type: varchar
+            description: Title in original language
+          - name: original_language
+            data_type: varchar
+            description: ISO 639-1 language code
+          - name: overview
+            data_type: varchar
+            description: Plot summary
+          - name: release_date
+            data_type: varchar
+            description: Theatrical release date (YYYY-MM-DD)
+          - name: adult
+            data_type: boolean
+            description: Adult content flag
+          - name: video
+            data_type: boolean
+            description: Video release flag
+          - name: poster_path
+            data_type: varchar
+            description: Relative path to poster image
+          - name: backdrop_path
+            data_type: varchar
+            description: Relative path to backdrop image
+          - name: genre_ids
+            data_type: varchar
+            description: TMDB genre ID list
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier
+
+      - name: movie_details
+        description: >
+          One row per horror movie. Full static metadata from the TMDB
+          `/movie/{id}` endpoint, including the US MPAA certification.
+        columns:
+          - name: id
+            data_type: integer
+            description: TMDB movie ID (primary key)
+          - name: title
+            data_type: varchar
+            description: Release title
+          - name: original_title
+            data_type: varchar
+            description: Title in original language
+          - name: tagline
+            data_type: varchar
+            description: Marketing tagline
+          - name: overview
+            data_type: varchar
+            description: Plot summary
+          - name: release_date
+            data_type: varchar
+            description: Theatrical release date (YYYY-MM-DD)
+          - name: status
+            data_type: varchar
+            description: Release status (e.g. Released, Post Production)
+          - name: runtime
+            data_type: integer
+            description: Runtime in minutes
+          - name: budget
+            data_type: integer
+            description: Production budget (USD)
+          - name: revenue
+            data_type: integer
+            description: Box office revenue (USD)
+          - name: genre_names
+            data_type: varchar
+            description: Comma-separated genre names
+          - name: us_certification
+            data_type: varchar
+            description: MPAA rating for US release (e.g. R, PG-13)
+          - name: homepage
+            data_type: varchar
+            description: Official website URL
+          - name: imdb_id
+            data_type: varchar
+            description: IMDb title ID (tt-prefixed)
+          - name: original_language
+            data_type: varchar
+            description: ISO 639-1 language code
+          - name: adult
+            data_type: boolean
+            description: Adult content flag
+          - name: video
+            data_type: boolean
+            description: Video release flag
+          - name: poster_path
+            data_type: varchar
+            description: Relative path to poster image
+          - name: backdrop_path
+            data_type: varchar
+            description: Relative path to backdrop image
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier
+
+      - name: movie_keywords
+        description: >
+          Normalised TMDB keyword associations, one row per
+          (movie, keyword) pair.
+        columns:
+          - name: movie_id
+            data_type: integer
+            description: TMDB movie ID (composite primary key)
+          - name: keyword_id
+            data_type: integer
+            description: TMDB keyword ID (composite primary key)
+          - name: keyword_name
+            data_type: varchar
+            description: Keyword text (lowercased)
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier
+
+      - name: movie_popularity
+        description: >
+          One row per movie per pipeline run. Popularity and vote metrics
+          from the TMDB discover endpoint; append-only time series.
+        columns:
+          - name: id
+            data_type: integer
+            description: TMDB movie ID (composite primary key)
+          - name: scraped_at
+            data_type: timestamp
+            description: UTC timestamp of the pipeline run (composite primary key)
+          - name: popularity
+            data_type: double
+            description: TMDB popularity score
+          - name: vote_average
+            data_type: double
+            description: Mean user rating (0-10)
+          - name: vote_count
+            data_type: integer
+            description: Number of user ratings
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier
+
+      - name: omdb_metadata
+        description: >
+          One row per matched movie. Cast, crew, and descriptive metadata
+          from OMDb; merged on `imdb_id`.
+        columns:
+          - name: imdb_id
+            data_type: varchar
+            description: IMDb title ID (primary key)
+          - name: tmdb_id
+            data_type: integer
+            description: TMDB movie ID (foreign key to movie_catalogue)
+          - name: title
+            data_type: varchar
+            description: Title as listed on OMDb
+          - name: year
+            data_type: varchar
+            description: Release year
+          - name: rated
+            data_type: varchar
+            description: MPAA content rating (e.g. R, PG-13, NR)
+          - name: runtime
+            data_type: varchar
+            description: Runtime (e.g. "109 min")
+          - name: director
+            data_type: varchar
+            description: Director name(s)
+          - name: writer
+            data_type: varchar
+            description: Writer name(s)
+          - name: actors
+            data_type: varchar
+            description: Top-billed cast
+          - name: plot
+            data_type: varchar
+            description: Short plot summary
+          - name: awards
+            data_type: varchar
+            description: Awards and nominations summary
+          - name: dvd
+            data_type: varchar
+            description: DVD release date
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier
+
+      - name: omdb_scores
+        description: >
+          One row per matched movie per pipeline run. Aggregated review
+          scores from OMDb; append-only time series.
+        columns:
+          - name: imdb_id
+            data_type: varchar
+            description: IMDb title ID (composite primary key)
+          - name: scraped_at
+            data_type: timestamp
+            description: UTC timestamp of the pipeline run (composite primary key)
+          - name: tmdb_id
+            data_type: integer
+            description: TMDB movie ID (foreign key to movie_catalogue)
+          - name: imdb_rating
+            data_type: varchar
+            description: IMDb weighted average rating (0-10)
+          - name: imdb_votes
+            data_type: varchar
+            description: Number of IMDb user votes
+          - name: metascore
+            data_type: varchar
+            description: Metacritic score (0-100)
+          - name: rotten_tomatoes_score
+            data_type: varchar
+            description: Rotten Tomatoes tomatometer (e.g. "72%")
+          - name: metacritic_score
+            data_type: varchar
+            description: Metacritic score from the Ratings array
+          - name: box_office
+            data_type: varchar
+            description: US box office gross (e.g. "$47,000,000")
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier
+
+      - name: violence_gore_analysis
+        description: >
+          One row per analysed movie per run. Raw Anthropic Claude assessment
+          of violence/gore severity and frequency; append-only.
+        columns:
+          - name: title
+            data_type: varchar
+            description: Movie title analysed
+          - name: release_date
+            data_type: varchar
+            description: Release date used to disambiguate the movie (YYYY-MM-DD)
+          - name: model
+            data_type: varchar
+            description: Anthropic model used for the analysis
+          - name: model_response
+            data_type: varchar
+            description: Raw model response text
+          - name: timestamp
+            data_type: timestamp
+            description: When the analysis was performed
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier

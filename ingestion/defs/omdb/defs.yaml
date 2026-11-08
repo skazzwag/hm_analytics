@@ -1,0 +1,12 @@
+type: dagster_dlt.DltLoadCollectionComponent
+
+attributes:
+  loads:
+    - source: .loads.omdb_static_load_source
+      pipeline: .loads.omdb_static_pipeline
+      translation:
+        group_name: "omdb_static"
+    - source: .loads.omdb_temporal_load_source
+      pipeline: .loads.omdb_temporal_pipeline
+      translation:
+        group_name: "omdb_temporal"

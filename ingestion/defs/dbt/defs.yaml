@@ -1,0 +1,9 @@
+type: dagster_dbt.DbtProjectComponent
+attributes:
+  project: "{{ context.project_root }}/transformation"
+  translation:
+    group_name: "dbt"
+  cli_args:
+    - build
+    - --indirect-selection=cautious
+    - --target={{ env.DBT_TARGET }}

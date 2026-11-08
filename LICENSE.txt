@@ -1,0 +1,4 @@
+Copyright (c) YEAR YOUR ORGANISATION. All rights reserved.
+
+Replace this file with your organisation's license before publishing the
+template or any repository created from it.

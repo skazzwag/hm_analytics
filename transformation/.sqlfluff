@@ -1,0 +1,4 @@
+[sqlfluff:templater:dbt]
+project_dir = .
+profiles_dir = .
+profile = analytics_warehouse

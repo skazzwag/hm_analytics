@@ -1,0 +1,12 @@
+type: dagster_dlt.DltLoadCollectionComponent
+
+attributes:
+  loads:
+    - source: .loads.tmdb_static_load_source
+      pipeline: .loads.tmdb_static_pipeline
+      translation:
+        group_name: "tmdb_static"
+    - source: .loads.tmdb_temporal_load_source
+      pipeline: .loads.tmdb_temporal_pipeline
+      translation:
+        group_name: "tmdb_temporal"

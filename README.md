@@ -2,22 +2,35 @@
 
 Analytics project studying the effect of violence and gore on horror movie reception.
 
-Data is ingested from [TMDB](https://www.themoviedb.org/) and [OMDb](https://www.omdbapi.com/) into a DuckDB/MotherDuck database using [dlt](https://dlthub.com/). Classifications on the level of violence and gore in the horror movies are determined through sending a prompt to the Anthropic API to search for reviews and info about the movie, which is also handled as a custom dlt pipeline. The 
+Data is ingested from [TMDB](https://www.themoviedb.org/) and [OMDb](https://www.omdbapi.com/) into a DuckDB/MotherDuck database using [dlt](https://dlthub.com/). Classifications on the level of violence and gore in the horror movies are determined through sending a prompt to the Anthropic API to search for reviews and info about the movie, which is also handled as a custom dlt pipeline.
 
 ## Project Structure
 
 ```
 hm_analytics/
-├── ingestion/                  # dlt ingestion pipelines
-│   ├── sources/
-│   │   ├── tmdb.py             # TMDB source
-│   │   ├── omdb.py             # OMDB sources
-│   │   └── movie_analysis.py   # Athropic LLM results source
-│   └── run_pipeline.py         # Production pipeline runner
-├── transformation/             # dbt Core transformations (coming soon)
-├── visualisation/              # Marimo analysis notebooks (coming soon)
-└── .dlt/
-    └── config.toml             # Non-secret config (API base URLs, dataset name)
+├── ingestion/                     # dlt pipelines orchestrated by Dagster
+│   ├── definitions.py             # Dagster definitions entrypoint
+│   ├── defs/                      # Dagster components (dlt loads, dbt, schedules)
+│   ├── sources/                   # dlt source implementations
+│   │   └── api/
+│   │       ├── tmdb/              # TMDB source
+│   │       ├── omdb/              # OMDb sources
+│   │       └── movie_analysis/    # Anthropic LLM analysis source
+│   ├── dockerfiles/               # user-code and webserver images
+│   └── run_pipeline.py            # CLI runner (manual runs without Dagster)
+├── transformation/                # dbt Core transformations (DuckDB / MotherDuck)
+│   ├── models/0_sources/          # source declarations
+│   ├── models/1_staging/          # stg_ — clean and standardize
+│   ├── models/2_intermediate/     # int_ — business logic and joins
+│   ├── models/3_domain/           # dmn_ — core business entities
+│   ├── models/4_presentation/     # prs_ — analysis-ready tables
+│   ├── models/5_activation/       # act_ — reverse ETL / activation
+│   ├── macros/                    # project macros
+│   └── guides/                    # warehouse Guides
+├── infrastructure/motherduck/     # SQL for warehouse databases, shares, grants
+├── documentation/                 # onboarding and engineering docs
+├── tools/                         # repo tooling (dbt metadata checks)
+└── visualisation/                 # reserved for dashboards
 ```
 
 ## Quickstart
@@ -25,26 +38,22 @@ hm_analytics/
 ### 1. Install dependencies
 
 ```bash
-uv sync
+make setup   # uv + pre-commit (or: uv sync)
 ```
 
 ### 2. Configure secrets
 
-Ensure you have the following environment variables set:
+Copy `.env.example` to `.env` and fill in the values:
 
 ```
 # For ingestion pipelines
 SOURCES__TMDB__API_KEY=...
 SOURCES__OMDB__API_KEY=...
+SOURCES__ANTHROPIC__API_KEY=...
 DESTINATION__MOTHERDUCK__CREDENTIALS="md:///horror_movies?motherduck_token=..."
-ANTHROPIC_API_KEY=...
 
 # For dbt pipelines
 MOTHERDUCK_PROD_TOKEN=...
-
-# For MCP assistance
-HM_ANALYTICS_DBT_PROJECT_DIR="{repo_root_path}/transformation"
-HM_ANALYTICS_DBT_PAT="{repo_root_path}/.venv/bin/dbt"
 ```
 
 For the MotherDuck remote MCP with Opencode run `opencode mcp auth motherduck` to authenticate.
@@ -57,8 +66,36 @@ ensure that you have `direnv` installed, the `eval "$(direnv hook bash)"` added 
 
 ### 3. Run the pipeline
 
+Without Dagster (manual runs):
+
 ```bash
-uv run ingestion/run_pipeline.py
+uv run ingestion/run_pipeline.py             # temporal (default)
+uv run ingestion/run_pipeline.py --static    # static refresh
+```
+
+With Dagster:
+
+```bash
+make dev       # Dagster UI without Docker
+make serve     # Dagster UI via Docker Compose
+make teardown  # stop Docker Compose
+```
+
+## Layer conventions
+
+| Folder | Prefix | Role |
+| --- | --- | --- |
+| `1_staging` | `stg_` | Clean and standardize source data |
+| `2_intermediate` | `int_` | Business logic and joins |
+| `3_domain` | `dmn_` | Core business entities |
+| `4_presentation` | `prs_` | Analysis-ready tables |
+| `5_activation` | `act_` | Reverse ETL / activation |
+
+dbt lives under `transformation/`. Default target is `dev-local` (a local DuckDB file).
+
+```shell
+uv run dbt seed --project-dir transformation --profiles-dir transformation --target dev-local
+uv run dbt build --project-dir transformation --profiles-dir transformation --target dev-local
 ```
 
 ---
@@ -67,7 +104,7 @@ uv run ingestion/run_pipeline.py
 
 The ingestion is split into **static** and **temporal** pipelines to avoid re-fetching unchanged data on every run.
 
-| Cadence | Flag | Pipeline | Tables written |
+| Cadence | Mode | Pipeline | Tables written |
 |---|---|---|---|
 | Weekly | `--static` | TMDB static | `movie_catalogue`, `movie_details`, `movie_keywords` |
 | Weekly | `--static` | OMDb static | `omdb_metadata` |
@@ -205,31 +242,21 @@ One row per matched movie per pipeline run. Aggregated review scores.
 
 ---
 
-## Scheduling with GitHub Actions
+## Scheduling with Dagster
 
-The pipeline runs automatically via `.github/workflows/ingest.yml`:
+The pipelines run via the Dagster asset jobs in `ingestion/defs/schedules.py`:
 
-| Schedule | Mode | What runs |
+| Schedule | Cron (UTC) | What runs |
 |---|---|---|
-| Daily, 06:00 UTC | temporal | TMDB popularity snapshot + OMDb score batch |
-| Weekly (Sunday), 05:00 UTC | `--tmdb-static` | TMDB catalogue, details, keywords only |
-| Manual dispatch | configurable | Any mode with custom `max_pages` and `omdb_batch_size` |
+| `temporal_ingestion_schedule` | Daily, 06:00 | TMDB popularity snapshot + OMDb score batch + analysis |
+| `tmdb_static_ingestion_schedule` | Weekly (Sunday), 05:00 | TMDB catalogue, details, keywords |
+| Manual | — | `omdb_static_ingestion_job` (any mode with custom `max_pages` / `omdb_batch_size`) |
 
 > The weekly job intentionally omits `omdb_static` to avoid consuming the daily OMDb quota. Run `--static` manually when you want to refresh OMDb metadata for the full catalogue.
 
-### GitHub Actions secrets required
-
-Add these in **Settings → Secrets and variables → Actions**:
-
-| Secret | Description |
-|---|---|
-| `MOTHERDUCK_TOKEN` | MotherDuck personal access token |
-| `TMDB_API_KEY` | TMDB API key |
-| `OMDB_API_KEY` | OMDb API key |
-
 ### MotherDuck (production destination)
 
-GitHub Actions writes to [MotherDuck](https://motherduck.com/) instead of a local DuckDB file. To use MotherDuck locally, add to `.env`:
+Scheduled runs write to [MotherDuck](https://motherduck.com/) instead of a local DuckDB file. To use MotherDuck locally, add to `.env`:
 
 ```
 PIPELINE_DESTINATION=motherduck

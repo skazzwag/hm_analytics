@@ -1,0 +1,57 @@
+[sqlfluff]
+dialect = duckdb
+templater = dbt
+exclude_rules = structure.column_order, convention.not_equal, references.keywords, structure.using, layout.indent,
+max_line_length = 500
+large_file_skip_byte_limit = 60000
+
+[sqlfluff:templater:dbt]
+project_dir = transformation/
+profiles_dir = transformation/
+profile = analytics_warehouse
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = True
+
+[sqlfluff:indentation]
+indented_on_contents = False
+template_blocks_indent = False
+tab_space_size = 4
+indent_unit = space
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = lower
+
+[sqlfluff:layout:type:orderby_clause]
+keyword_line_position = leading
+keyword_line_position_exclusions = window_specification, aggregate_order_by
+
+[sqlfluff:rules:capitalisation.identifiers]
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:layout.long_lines]
+ignore_comment_lines = True
+ignore_comment_clauses = True
+
+[sqlfluff:rules:capitalisation.functions]
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.literals]
+capitalisation_policy = lower
+
+[sqlfluff:rules:ambiguous.column_references]
+group_by_and_order_by_style = explicit
+
+[sqlfluff:rules:references.special_chars]
+unquoted_identifiers_policy = all
+quoted_identifiers_policy = none
+allow_space_in_identifier = False
+
+[sqlfluff:rules:capitalisation.types]
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:convention.casting_style]
+preferred_type_casting_style = shorthand
+
+[sqlfluff:layout:type:comma]
+line_position = trailing

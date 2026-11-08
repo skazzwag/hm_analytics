@@ -1,0 +1,88 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+---
+services:
+  dagster-postgresql:
+    image: postgres:18
+    container_name: DagsterPostgreSQL
+    command: >
+      -c ssl=on
+      -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+      -c ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+    environment:
+      POSTGRES_DB: "dagster"
+      POSTGRES_USER: "dagster"
+      POSTGRES_PASSWORD: "dagster"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username dagster --dbname dagster"]
+      interval: 10s
+      timeout: 8s
+      retries: 5
+    networks: ["dagster-network"]
+    expose: ["5432"]
+    ports: ["5432:5432"]
+    volumes: ["./.dagster_home/postgres_data:/var/lib/postgresql"]
+
+  dagster-user-code:
+    container_name: DagsterUserCode
+    build: {context: ".", dockerfile: "ingestion/dockerfiles/user_code.Dockerfile"}
+    image: dagster-user-code
+    restart: always
+    environment:
+      DAGSTER_CURRENT_IMAGE: "dagster-user-code"
+      PIPELINE_DESTINATION: "$PIPELINE_DESTINATION"
+      SOURCES__TMDB__API_KEY: "$SOURCES__TMDB__API_KEY"
+      SOURCES__OMDB__API_KEY: "$SOURCES__OMDB__API_KEY"
+      SOURCES__ANTHROPIC__API_KEY: "$SOURCES__ANTHROPIC__API_KEY"
+      DESTINATION__MOTHERDUCK__CREDENTIALS: "$DESTINATION__MOTHERDUCK__CREDENTIALS"
+      MOTHERDUCK_PROD_TOKEN: "$MOTHERDUCK_PROD_TOKEN"
+      DAGSTER_ENVIRONMENT: "$DAGSTER_ENVIRONMENT"
+      DBT_TARGET: "$DBT_TARGET"
+      <<: &shared-env-vars
+        DAGSTER_POSTGRESQL_HOST: "dagster-postgresql"
+        DAGSTER_POSTGRESQL_PORT: 5432
+        DAGSTER_POSTGRESQL_USERNAME: "dagster"
+        DAGSTER_POSTGRESQL_PASSWORD: "dagster"
+        DAGSTER_POSTGRESQL_DATABASE: "dagster"
+    networks: ["dagster-network"]
+    volumes:
+      - &compute-logs .dagster_home/blob_storage_data/logs:/opt/dagster/logs
+
+  dagster-webserver:
+    container_name: DagsterWebServer
+    build: {context: ".", dockerfile: "ingestion/dockerfiles/webserver.Dockerfile"}
+    image: dagster-webserver
+    entrypoint: ["uv", "run", "dagster-webserver", "--host", "0.0.0.0", "--port", "3000"]
+    expose: ["3000"]
+    ports: ["3000:3000"]
+    environment:
+      <<: *shared-env-vars
+    volumes:
+      - *compute-logs
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/io_manager_storage:/tmp/io_manager_storage
+    depends_on:
+      dagster-postgresql: {condition: service_healthy}
+      dagster-user-code: {condition: service_healthy}
+    networks: ["dagster-network"]
+
+  dagster-daemon:
+    container_name: DagsterDaemon
+    build: {context: ".", dockerfile: "ingestion/dockerfiles/webserver.Dockerfile"}
+    image: dagster-daemon
+    entrypoint: ["uv", "run", "dagster-daemon", "run"]
+    restart: on-failure
+    environment:
+      <<: *shared-env-vars
+    volumes:
+      - *compute-logs
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/io_manager_storage:/tmp/io_manager_storage
+    depends_on:
+      dagster-postgresql: {condition: service_healthy}
+      dagster-user-code: {condition: service_healthy}
+    networks: ["dagster-network"]
+
+networks:
+  dagster-network:
+    driver: bridge
+    name: dagster-network
