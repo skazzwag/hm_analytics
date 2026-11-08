@@ -1,4 +1,4 @@
-type: dagster_dlt.DltLoadCollectionComponent
+type: ingestion.components.RefreshableDltLoadCollectionComponent
 
 attributes:
   loads:
@@ -6,3 +6,5 @@ attributes:
       pipeline: .loads.movie_analysis_pipeline
       translation:
         group_name: "movie_analysis"
+        deps:
+          - "raw/movie_catalogue"

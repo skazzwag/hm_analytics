@@ -1,9 +1,9 @@
 """
 Production runner for the horror movie ingestion pipelines.
 
-Thin CLI wrapper around the dlt sources for manual or scheduled runs without
-Dagster. The Dagster asset jobs in ``ingestion/defs/schedules.py`` run the
-same sources on a schedule.
+Thin CLI wrapper around the dlt sources for manual runs without Dagster.
+The Dagster asset jobs in ``ingestion/defs/jobs.py`` run the same sources
+via manual triggers.
 """
 
 import argparse
@@ -16,7 +16,6 @@ from ingestion.sources.api.movie_analysis.main import movie_analysis_source
 from ingestion.sources.api.omdb.main import omdb_static_source, omdb_temporal_source
 from ingestion.sources.api.tmdb.main import tmdb_static_source, tmdb_temporal_source
 
-PIPELINE_NAME = "horror_movies"
 DATASET_NAME = "raw"
 DESTINATION = os.getenv("PIPELINE_DESTINATION", "duckdb")
 
@@ -38,7 +37,7 @@ def get_movies() -> list[dict]:
         ``original_title``, and ``release_date``.
     """
     pipeline = dlt.pipeline(
-        pipeline_name=PIPELINE_NAME,
+        pipeline_name="tmdb_static",
         destination=DESTINATION,
         dataset_name=DATASET_NAME,
     )
@@ -65,7 +64,7 @@ def run_tmdb_static(max_pages: int) -> None:
     """
     logger.info("Running TMDB static pipeline (max_pages=%d)...", max_pages)
     load_info = dlt.pipeline(
-        pipeline_name=PIPELINE_NAME,
+        pipeline_name="tmdb_static",
         destination=DESTINATION,
         dataset_name=DATASET_NAME,
     ).run(tmdb_static_source(max_pages=max_pages))
@@ -76,8 +75,7 @@ def run_tmdb_temporal(max_pages: int) -> None:
     """
     Run the TMDB temporal pipeline.
 
-    Appends a popularity and vote snapshot for the current horror movies and
-    upserts ``movie_catalogue`` so OMDb temporal can always find the table.
+    Appends a popularity and vote snapshot for the current horror movies.
 
     Parameters
     ----------
@@ -86,7 +84,7 @@ def run_tmdb_temporal(max_pages: int) -> None:
     """
     logger.info("Running TMDB temporal pipeline (max_pages=%d)...", max_pages)
     load_info = dlt.pipeline(
-        pipeline_name=PIPELINE_NAME,
+        pipeline_name="tmdb_temporal",
         destination=DESTINATION,
         dataset_name=DATASET_NAME,
     ).run(tmdb_temporal_source(max_pages=max_pages))
@@ -104,7 +102,7 @@ def run_omdb_static() -> None:
     movies = get_movies()
     logger.info("Running OMDb static pipeline (%d movies)...", len(movies))
     load_info = dlt.pipeline(
-        pipeline_name=PIPELINE_NAME,
+        pipeline_name="omdb_static",
         destination=DESTINATION,
         dataset_name=DATASET_NAME,
     ).run(omdb_static_source().omdb_metadata(movies=movies))
@@ -130,7 +128,7 @@ def run_omdb_temporal(batch_size: int) -> None:
         batch_size,
     )
     load_info = dlt.pipeline(
-        pipeline_name=PIPELINE_NAME,
+        pipeline_name="omdb_temporal",
         destination=DESTINATION,
         dataset_name=DATASET_NAME,
     ).run(omdb_temporal_source(batch_size=batch_size).omdb_scores(movies=movies))
@@ -163,7 +161,7 @@ def main() -> None:
     Parse CLI arguments and dispatch to the appropriate pipeline functions.
 
     Defaults to the temporal pipelines when neither ``--static`` nor
-    ``--temporal`` is specified, matching the daily schedule behaviour.
+    ``--temporal`` is specified.
     """
     parser = argparse.ArgumentParser(
         description="Run the horror movie ingestion pipeline.",

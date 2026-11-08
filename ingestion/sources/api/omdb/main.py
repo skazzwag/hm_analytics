@@ -18,6 +18,10 @@ Resolved from environment variables (loaded via ``.env``):
     SOURCES__OMDB__API_KEY
 """
 
+# dlt config section: keeps SOURCES__OMDB__* env keys and the
+# [sources.omdb] config.toml section stable across the static/temporal split.
+__source_name__ = "omdb"
+
 import time
 from datetime import datetime, timezone
 from typing import Iterator
@@ -113,7 +117,7 @@ def lookup_params(movie: dict) -> dict:
     return params
 
 
-@dlt.source(name="omdb")
+@dlt.source(name="omdb_static")
 def omdb_static_source(
     api_key: str = dlt.secrets.value,
     base_url: str = dlt.config.value,
@@ -176,7 +180,7 @@ def omdb_static_source(
     return omdb_metadata
 
 
-@dlt.source(name="omdb")
+@dlt.source(name="omdb_temporal")
 def omdb_temporal_source(
     api_key: str = dlt.secrets.value,
     base_url: str = dlt.config.value,

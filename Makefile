@@ -21,9 +21,9 @@ lock: setup ## Generate uv.lock
 .PHONY: lint
 lint:  ## Run linters
 	@echo "\\033[0;34mDagster checks\\033[0m"
-	#DAGSTER_POSTGRESQL_HOST="localhost" uv run dg check defs
-	uv run dg check toml
-	uv run dg check yaml
+	#PYTHONPATH=. DAGSTER_POSTGRESQL_HOST="localhost" uv run dg check defs
+	PYTHONPATH=. uv run dg check toml
+	PYTHONPATH=. uv run dg check yaml
 	@echo "\\033[0;34mpre-commit checks\\033[0m"
 	uv run pre-commit run --all-files --hook-stage pre-commit
 	@echo "\\033[0;34mpre-push checks\\033[0m"

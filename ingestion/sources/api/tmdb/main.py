@@ -8,11 +8,9 @@ Two sources handle different run cadences:
   movie IDs across all three resources, eliminating the 3x discover duplication
   that would occur if each resource re-paginated independently.
 
-- `tmdb_temporal_source` — popularity and vote snapshots, plus catalogue upsert.
+- `tmdb_temporal_source` — popularity and vote snapshots.
   Run daily. Uses the discover endpoint only (~25 requests for 500 movies);
-  never calls ``/movie/{id}``. Also upserts ``movie_catalogue`` so that
-  OMDb temporal can always find the table even when the static pipeline
-  has not yet run.
+  never calls ``/movie/{id}``.
 
 Secrets
 -------
@@ -20,6 +18,10 @@ Resolved from environment variables (loaded via ``.env``):
 
     SOURCES__TMDB__API_KEY
 """
+
+# dlt config section: keeps SOURCES__TMDB__* env keys and the
+# [sources.tmdb] config.toml section stable across the static/temporal split.
+__source_name__ = "tmdb"
 
 import time
 from datetime import datetime, timezone
@@ -118,7 +120,7 @@ def paginate_discover(base_url: str, api_key: str, max_pages: int) -> list[dict]
     return movies
 
 
-@dlt.source(name="tmdb")
+@dlt.source(name="tmdb_static")
 def tmdb_static_source(
     api_key: str = dlt.secrets.value,
     base_url: str = dlt.config.value,
@@ -232,7 +234,7 @@ def tmdb_static_source(
     return movie_catalogue, movie_details, movie_keywords
 
 
-@dlt.source(name="tmdb")
+@dlt.source(name="tmdb_temporal")
 def tmdb_temporal_source(
     api_key: str = dlt.secrets.value,
     base_url: str = dlt.config.value,
@@ -245,8 +247,8 @@ def tmdb_temporal_source(
     500 movies. Each daily run appends a new timestamped snapshot, building
     a time series suitable for tracking popularity and rating trends.
 
-    Writes to tables: ``movie_catalogue`` (merge/upsert) and
-    ``movie_popularity`` (append-only).
+    Writes to table: ``movie_popularity`` (append-only). Catalogue ownership
+    lives with ``tmdb_static_source`` (see its ``movie_catalogue`` resource).
 
     Parameters
     ----------
@@ -259,20 +261,6 @@ def tmdb_temporal_source(
     """
 
     movies = paginate_discover(base_url, api_key, max_pages)
-
-    @dlt.resource(
-        name="movie_catalogue",
-        write_disposition="merge",
-        primary_key="id",
-    )
-    def movie_catalogue() -> Iterator[TDataItems]:
-        """Upsert static fields from the discover endpoint.
-
-        Keeps ``movie_catalogue`` current so that OMDb temporal can always
-        query it, even when the full static pipeline has not run yet.
-        """
-        for movie in movies:
-            yield {k: v for k, v in movie.items() if k not in _TEMPORAL_DETAIL_FIELDS}
 
     @dlt.resource(
         name="movie_popularity",
@@ -291,4 +279,4 @@ def tmdb_temporal_source(
                 "scraped_at": scraped_at,
             }
 
-    return movie_catalogue, movie_popularity
+    return movie_popularity

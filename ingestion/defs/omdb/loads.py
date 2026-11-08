@@ -10,14 +10,14 @@ _DESTINATION = os.getenv("PIPELINE_DESTINATION", "duckdb")
 
 omdb_static_load_source = omdb_static_source()
 omdb_static_pipeline = dlt.pipeline(
-    pipeline_name="horror_movies",
+    pipeline_name="omdb_static",
     dataset_name="raw",
     destination=_DESTINATION,
 )
 
 omdb_temporal_load_source = omdb_temporal_source()
 omdb_temporal_pipeline = dlt.pipeline(
-    pipeline_name="horror_movies",
+    pipeline_name="omdb_temporal",
     dataset_name="raw",
     destination=_DESTINATION,
 )

@@ -1,4 +1,4 @@
-type: dagster_dlt.DltLoadCollectionComponent
+type: ingestion.components.RefreshableDltLoadCollectionComponent
 
 attributes:
   loads:

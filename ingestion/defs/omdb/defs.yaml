@@ -1,4 +1,4 @@
-type: dagster_dlt.DltLoadCollectionComponent
+type: ingestion.components.RefreshableDltLoadCollectionComponent
 
 attributes:
   loads:
@@ -10,3 +10,5 @@ attributes:
       pipeline: .loads.omdb_temporal_pipeline
       translation:
         group_name: "omdb_temporal"
+        deps:
+          - "raw/movie_catalogue"

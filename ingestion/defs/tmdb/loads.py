@@ -10,14 +10,14 @@ _DESTINATION = os.getenv("PIPELINE_DESTINATION", "duckdb")
 
 tmdb_static_load_source = tmdb_static_source()
 tmdb_static_pipeline = dlt.pipeline(
-    pipeline_name="horror_movies",
+    pipeline_name="tmdb_static",
     dataset_name="raw",
     destination=_DESTINATION,
 )
 
 tmdb_temporal_load_source = tmdb_temporal_source()
 tmdb_temporal_pipeline = dlt.pipeline(
-    pipeline_name="horror_movies",
+    pipeline_name="tmdb_temporal",
     dataset_name="raw",
     destination=_DESTINATION,
 )

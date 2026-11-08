@@ -10,7 +10,7 @@ Data is ingested from [TMDB](https://www.themoviedb.org/) and [OMDb](https://www
 hm_analytics/
 ├── ingestion/                     # dlt pipelines orchestrated by Dagster
 │   ├── definitions.py             # Dagster definitions entrypoint
-│   ├── defs/                      # Dagster components (dlt loads, dbt, schedules)
+│   ├── defs/                      # Dagster components (dlt loads, dbt, jobs)
 │   ├── sources/                   # dlt source implementations
 │   │   └── api/
 │   │       ├── tmdb/              # TMDB source
@@ -104,12 +104,21 @@ uv run dbt build --project-dir transformation --profiles-dir transformation --ta
 
 The ingestion is split into **static** and **temporal** pipelines to avoid re-fetching unchanged data on every run.
 
-| Cadence | Mode | Pipeline | Tables written |
+| Cadence | Mode | dlt pipeline | Tables written |
 |---|---|---|---|
-| Weekly | `--static` | TMDB static | `movie_catalogue`, `movie_details`, `movie_keywords` |
-| Weekly | `--static` | OMDb static | `omdb_metadata` |
-| Daily | _(default)_ | TMDB temporal | `movie_popularity` |
-| Daily | _(default)_ | OMDb temporal | `omdb_scores` |
+| Weekly | `--static` | `tmdb_static` | `movie_catalogue`, `movie_details`, `movie_keywords` |
+| Weekly | `--static` | `omdb_static` | `omdb_metadata` |
+| Daily | _(default)_ | `tmdb_temporal` | `movie_popularity` |
+| Daily | _(default)_ | `omdb_temporal` | `omdb_scores` |
+
+The Anthropic violence/gore analysis (`violence_gore_analysis` pipeline) runs
+with the temporal mode and writes `violence_gore_analysis`.
+
+> **Run order on a fresh warehouse:** `movie_catalogue` is written only by the
+> `tmdb_static` pipeline. The `omdb_temporal` and analysis pipelines read it at
+> runtime, so run the static load first (in Dagster, `raw/omdb_scores` and
+> `raw/violence_gore_analysis` declare a dependency on `raw/movie_catalogue`,
+> which enforces this ordering).
 
 ### Request cost per run
 
@@ -242,21 +251,33 @@ One row per matched movie per pipeline run. Aggregated review scores.
 
 ---
 
-## Scheduling with Dagster
+## Manual triggering with Dagster
 
-The pipelines run via the Dagster asset jobs in `ingestion/defs/schedules.py`:
+All Dagster jobs are manual-trigger only; nothing runs on a schedule. Launch
+them from the Dagster UI (Deployment > Jobs > Launch) or the CLI:
 
-| Schedule | Cron (UTC) | What runs |
-|---|---|---|
-| `temporal_ingestion_schedule` | Daily, 06:00 | TMDB popularity snapshot + OMDb score batch + analysis |
-| `tmdb_static_ingestion_schedule` | Weekly (Sunday), 05:00 | TMDB catalogue, details, keywords |
-| Manual | — | `omdb_static_ingestion_job` (any mode with custom `max_pages` / `omdb_batch_size`) |
+```bash
+# From the repository root
+uv run dagster job launch -m ingestion.definitions -j temporal_ingestion_job
+# Refresh variant (runs the same assets with write_disposition="replace")
+uv run dagster job launch -m ingestion.definitions -j temporal_refresh_job
+```
 
-> The weekly job intentionally omits `omdb_static` to avoid consuming the daily OMDb quota. Run `--static` manually when you want to refresh OMDb metadata for the full catalogue.
+| Job | What runs |
+|---|---|
+| `tmdb_static_ingestion_job` | TMDB catalogue, details, keywords (merge) |
+| `omdb_static_ingestion_job` | OMDb metadata (merge) |
+| `temporal_ingestion_job` | TMDB popularity + OMDb scores + analysis (append) |
+| `dbt_job` | dbt transformation models |
+
+Each area also has a `*_refresh_job` (`tmdb_static_refresh_job`,
+`omdb_static_refresh_job`, `temporal_refresh_job`) that runs the same assets
+with `write_disposition="replace"`: it **deletes and rebuilds** the target
+tables, so use it only when you want a full reload.
 
 ### MotherDuck (production destination)
 
-Scheduled runs write to [MotherDuck](https://motherduck.com/) instead of a local DuckDB file. To use MotherDuck locally, add to `.env`:
+Manual runs write to [MotherDuck](https://motherduck.com/) instead of a local DuckDB file. To use MotherDuck locally, add to `.env`:
 
 ```
 PIPELINE_DESTINATION=motherduck
@@ -271,4 +292,4 @@ DESTINATION__MOTHERDUCK__CREDENTIALS=md:///horror_movies?motherduck_token=YOUR_T
 - [uv](https://docs.astral.sh/uv/)
 - TMDB API key (free)
 - OMDb API key (free)
-- MotherDuck account (for scheduled/production runs)
+- MotherDuck account (for production runs)
