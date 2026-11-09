@@ -1,0 +1,86 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "build",
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+      "*.secrets.toml": "deny",
+      "**/.dlt/secrets.toml": "deny",
+      "**/.motherduck/**": "deny",
+      "**/.duckdb/stored_secrets/**": "deny",
+      "**/.aws/credentials": "deny",
+      "**/profiles.yml": "deny"
+    },
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git show*": "allow",
+      "git worktree list*": "allow",
+      "uv run pytest*": "allow",
+      "PYTHONPATH=. uv run pytest*": "allow",
+      "uv run dg check yaml*": "allow",
+      "uv run dg check toml*": "allow",
+      "PYTHONPATH=. uv run dg check yaml*": "allow",
+      "PYTHONPATH=. uv run dg check toml*": "allow",
+      "uv run black*": "allow",
+      "uv run flake8*": "allow",
+      "uv run isort*": "allow",
+      "dbt*": "deny",
+      "uv run dbt*": "deny",
+      "uv run --*dbt*": "deny",
+      "python* -m dbt*": "deny",
+      "altimate-dbt*": "deny",
+      "altimate-code run*": "deny",
+      "altimate run*": "deny",
+      "git push --force*": "deny",
+      "git push -f*": "deny",
+      "python .opencode/tools/dbt/run.py*": "deny",
+      "make guides-push*": "deny",
+      "motherduck guide push*": "deny",
+      "motherduck guide delete*": "deny",
+      "transformation/guides/sync.sh*": "deny"
+    },
+    "motherduck*": "deny",
+    "edit": {
+      "*": "ask",
+      "~/.config/opencode/**": "deny",
+      ".opencode/**": "deny",
+      ".agents/**": "deny",
+      "AGENTS.md": "deny",
+      "opencode.json": "deny",
+      ".opencode/tools/dbt/**": "deny"
+    }
+  },
+  "mcp": {
+    "motherduck": {
+      "type": "remote",
+      "url": "https://api.motherduck.com/mcp",
+      "enabled": true
+    }
+  },
+  "watcher": {
+    "ignore": [
+      "**/node_modules/**",
+      "**/target/**",
+      "**/dbt_packages/**",
+      "**/.venv/**",
+      "**/.analysis/**",
+      "**/.cursor/**"
+    ]
+  },
+  "agent": {
+    "plan": {
+      "permission": {
+        "edit": {
+          "*": "deny",
+          "~/.opencode/plan/**": "allow"
+        }
+      }
+    }
+  }
+}

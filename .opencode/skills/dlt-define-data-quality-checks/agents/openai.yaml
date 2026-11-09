@@ -1,0 +1,3 @@
+interface:
+  display_name: "Define Data Quality Checks"
+  short_description: "Core dlt ingestion quality workflow"

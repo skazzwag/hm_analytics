@@ -1,0 +1,3 @@
+interface:
+  display_name: "Altimate SQL Analysis"
+  short_description: "Check compiled SQL and inspect native column lineage."

@@ -1,0 +1,44 @@
+User-provided npx skills migration (review local changes before deleting):
+.agents/skills/creating-dbt-models/
+.agents/skills/debugging-dbt-errors/
+.agents/skills/testing-dbt-models/
+.agents/skills/documenting-dbt-models/
+.agents/skills/migrating-sql-to-dbt/
+.agents/skills/refactoring-dbt-models/
+.agents/skills/developing-incremental-models/
+.agents/skills/marimo-pair/
+.agents/skills/dagster-expert/   # remove after review: an old stub OR an npx full copy duplicates the canonical .opencode skill
+.opencode/skills/dagster-expert/ # DO NOT REMOVE: the updated distribution now includes the full skill
+
+New removals (do not copy the replacement ZIP over an old checkout without doing this):
+.opencode/skills/dbt-fido-model/
+tools/altimate/install-skills.mjs
+tools/altimate/test/install-skills.test.mjs
+
+If previously installed, back up and remove the old unprefixed `.agents/skills/{creating-dbt-models,debugging-dbt-errors,testing-dbt-models,documenting-dbt-models,migrating-sql-to-dbt,refactoring-dbt-models,developing-incremental-models}` directories before installing tool-prefixed skills; otherwise OpenCode discovers duplicates. Keep `.agents/skills/transformation-quality`, `.agents/skills/motherduck-guides` and `.agents/skills/altimate-sql-analysis`.
+
+Files removed relative to previous generated setup(s). In addition to the historical removals, this version **renames** the coordinator to product-owner. Copying new files without deleting old coordinator files would leave multiple selectable agents.
+
+NEW removal for this release:
+.opencode/agents/data-orchestrator.md
+
+Also remove from earlier installations:
+.opencode/agents/data-plan.md
+
+Review any local edits before deletion; migrate real Guide content, do not discard it.
+Applying the supplied patch handles these removals when the baseline matches.
+
+.opencode/agents/plan.md
+docs/guide-pr-alignment.md
+documentation/warehouse-guides/README.md
+documentation/warehouse-guides/_template/evidence.md
+documentation/warehouse-guides/_template/guide.md
+documentation/warehouse-guides/_template/guide.metadata.json
+documentation/warehouse-guides/_template/review.json
+documentation/warehouse-guides/evals.md
+documentation/warehouse-guides/fido-warehouse-orientation/evidence.md
+documentation/warehouse-guides/fido-warehouse-orientation/guide.md
+documentation/warehouse-guides/fido-warehouse-orientation/guide.metadata.json
+documentation/warehouse-guides/fido-warehouse-orientation/review.json
+tools/guides/check.mjs
+tools/guides/test/check.test.mjs

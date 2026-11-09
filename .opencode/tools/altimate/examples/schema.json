@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "tables": {
+    "orders": {
+      "columns": [
+        { "name": "order_id", "type": "INTEGER" },
+        { "name": "amount", "type": "DOUBLE" }
+      ]
+    }
+  }
+}

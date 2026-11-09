@@ -1,0 +1,1060 @@
+{
+  "source_upload": ".agents(1).zip",
+  "source_repository": "https://github.com/dagster-io/skills",
+  "pinned_git_commit": "c23c97fe5ffc4a39dc9cc1f9834c0311858cc16f",
+  "source_entrypoint_git_blob_verified": "6951cb37396d42a4cab7de2466447738deae32d1",
+  "upstream_verification_scope": "Entrypoint matches pinned Git blob; supporting documents are uploaded source copies with local SHA-256 recorded, but not individually verified against upstream",
+  "excluded_files": "174 Windows Zone.Identifier metadata sidecars",
+  "adapted_paths": [
+    "SKILL.md",
+    "references/cli/api/general.md",
+    "references/cli/launch.md",
+    "references/components/creating-components.md"
+  ],
+  "files": [
+    {
+      "path": "SKILL.md",
+      "source_sha256": "63c489ee9c0f584f5fe0486f0be58cd3a13e94f8d2801bb6de231690c6539d00",
+      "packaged_sha256": "42619692a7940de488118e25805ed7db1ddbca397361103cfdcb4112e1bd8225",
+      "adapted": true
+    },
+    {
+      "path": "references/asset-selection.md",
+      "source_sha256": "086a4793e9aaa1b5bd43d75872255791c0cc0b2973b0bb986b6ffef17d105123",
+      "packaged_sha256": "086a4793e9aaa1b5bd43d75872255791c0cc0b2973b0bb986b6ffef17d105123",
+      "adapted": false
+    },
+    {
+      "path": "references/assets/INDEX.md",
+      "source_sha256": "209ba1de1292bf060cc744d8ab16e45ed5ae64b5f2db3d717ed115ea426c2e30",
+      "packaged_sha256": "209ba1de1292bf060cc744d8ab16e45ed5ae64b5f2db3d717ed115ea426c2e30",
+      "adapted": false
+    },
+    {
+      "path": "references/assets/advanced-patterns.md",
+      "source_sha256": "a361265820df2d9561ed4c6881aca9ae0389121b95ea026ed949e43aaf299ec8",
+      "packaged_sha256": "a361265820df2d9561ed4c6881aca9ae0389121b95ea026ed949e43aaf299ec8",
+      "adapted": false
+    },
+    {
+      "path": "references/assets/definition-metadata.md",
+      "source_sha256": "e6158c4ce6ab635ac1809e1d9d260afe918ef61c0341f481383a94f835c22bfc",
+      "packaged_sha256": "e6158c4ce6ab635ac1809e1d9d260afe918ef61c0341f481383a94f835c22bfc",
+      "adapted": false
+    },
+    {
+      "path": "references/assets/dependencies.md",
+      "source_sha256": "0408ad58cbb988db86701677b0aabe9e35ab6d1c3f2e9239a12aae3802705f94",
+      "packaged_sha256": "0408ad58cbb988db86701677b0aabe9e35ab6d1c3f2e9239a12aae3802705f94",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/choosing-automation.md",
+      "source_sha256": "da060d5ddf67795fd8774fd7f61e09de1f9ef1de8eabecc8747cfd41217e62eb",
+      "packaged_sha256": "da060d5ddf67795fd8774fd7f61e09de1f9ef1de8eabecc8747cfd41217e62eb",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/declarative-automation/INDEX.md",
+      "source_sha256": "c67405d8559ba9d617ee9259b6f5e0f538fa5732c024088d3e270d273f4295f5",
+      "packaged_sha256": "c67405d8559ba9d617ee9259b6f5e0f538fa5732c024088d3e270d273f4295f5",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/declarative-automation/advanced.md",
+      "source_sha256": "7a8f1dc0639b75327c506f818f6a0b2fc4360e445e608a38959135a04fac3109",
+      "packaged_sha256": "7a8f1dc0639b75327c506f818f6a0b2fc4360e445e608a38959135a04fac3109",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/declarative-automation/core-concepts.md",
+      "source_sha256": "0c4e839b519f13ad0cdf36bf683e6c8108f21ed220a4c444b7f7e5a45147300f",
+      "packaged_sha256": "0c4e839b519f13ad0cdf36bf683e6c8108f21ed220a4c444b7f7e5a45147300f",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/declarative-automation/customization.md",
+      "source_sha256": "66e488d125e939d3b27cfc0933ef337cd3a2bde1d81592eebd83451efa5b60ce",
+      "packaged_sha256": "66e488d125e939d3b27cfc0933ef337cd3a2bde1d81592eebd83451efa5b60ce",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/declarative-automation/operands.md",
+      "source_sha256": "42cecd5eb498c51f8dbe5c915a8e97a8e993136cab736f214e8784aba3c9d1f3",
+      "packaged_sha256": "42cecd5eb498c51f8dbe5c915a8e97a8e993136cab736f214e8784aba3c9d1f3",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/declarative-automation/operators.md",
+      "source_sha256": "bfe6621b0299df65ad3cb95dd9843e51dffd8ca688bdb7b753d71bd2b5ae40d0",
+      "packaged_sha256": "bfe6621b0299df65ad3cb95dd9843e51dffd8ca688bdb7b753d71bd2b5ae40d0",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/schedules.md",
+      "source_sha256": "e09505ce6bff98efd2ae92cb250fa20238eec282b4b4e221fad54503217054e3",
+      "packaged_sha256": "e09505ce6bff98efd2ae92cb250fa20238eec282b4b4e221fad54503217054e3",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/sensors/asset-sensors.md",
+      "source_sha256": "b21865b44c364bf04595c26d491dc1258149c90fdee4714214e7da7bd1db4d19",
+      "packaged_sha256": "b21865b44c364bf04595c26d491dc1258149c90fdee4714214e7da7bd1db4d19",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/sensors/basic-sensors.md",
+      "source_sha256": "974536d4333bf55088be87c1386635c675191c946653479f3f017abefa8aff77",
+      "packaged_sha256": "974536d4333bf55088be87c1386635c675191c946653479f3f017abefa8aff77",
+      "adapted": false
+    },
+    {
+      "path": "references/automation/sensors/run-status-sensors.md",
+      "source_sha256": "1ba7fffa48bd28bc5cc089835963d51e46354112f90ad8c622dd120890a6d7d0",
+      "packaged_sha256": "1ba7fffa48bd28bc5cc089835963d51e46354112f90ad8c622dd120890a6d7d0",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/INDEX.md",
+      "source_sha256": "892d33829e61e577bc8128142af1093dbc782dc56f46cf66036fc86847a160fb",
+      "packaged_sha256": "892d33829e61e577bc8128142af1093dbc782dc56f46cf66036fc86847a160fb",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/agent/INDEX.md",
+      "source_sha256": "d0fbf43fefc463fd743aa5536bb9903f0fd2c87c7b19732acb8405645ba939e4",
+      "packaged_sha256": "d0fbf43fefc463fd743aa5536bb9903f0fd2c87c7b19732acb8405645ba939e4",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/agent/get.md",
+      "source_sha256": "7abe6b56025f2cf306c4e12e4f46dc4e7362a37edf3635c7b72d3524baee4f62",
+      "packaged_sha256": "7abe6b56025f2cf306c4e12e4f46dc4e7362a37edf3635c7b72d3524baee4f62",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/agent/list.md",
+      "source_sha256": "6c5329fd1a1be46d3642b773e4ed5229bc382b837ac9fb277260c33a3bda8f6c",
+      "packaged_sha256": "6c5329fd1a1be46d3642b773e4ed5229bc382b837ac9fb277260c33a3bda8f6c",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/alert-policy/INDEX.md",
+      "source_sha256": "a1b34906e8ed1b0460cb9b78f960b8960706127101016241ea04cdc07a517cc2",
+      "packaged_sha256": "a1b34906e8ed1b0460cb9b78f960b8960706127101016241ea04cdc07a517cc2",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/alert-policy/list.md",
+      "source_sha256": "e5d2f2bcbf5021c0037f356cb3ac3e6ec01a47f53ea60f4e358d28ceb418527a",
+      "packaged_sha256": "e5d2f2bcbf5021c0037f356cb3ac3e6ec01a47f53ea60f4e358d28ceb418527a",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/alert-policy/sync.md",
+      "source_sha256": "89f769cc780aa654a2be21cfa11be189a4a03098cdac7adbc97f1b827804fa67",
+      "packaged_sha256": "89f769cc780aa654a2be21cfa11be189a4a03098cdac7adbc97f1b827804fa67",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/artifact/INDEX.md",
+      "source_sha256": "4d58b8e152d012f2c4532287101c6d1451151e75c788b2d937fb5a9b3864b4ca",
+      "packaged_sha256": "4d58b8e152d012f2c4532287101c6d1451151e75c788b2d937fb5a9b3864b4ca",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/artifact/download.md",
+      "source_sha256": "37993fc075bf5b7c63132acb4abf0fccf83b1b320452e668e74ad0dfdabebeb5",
+      "packaged_sha256": "37993fc075bf5b7c63132acb4abf0fccf83b1b320452e668e74ad0dfdabebeb5",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/artifact/upload.md",
+      "source_sha256": "4be336ca4d3ef6bf7f29312a461a4ff877990d634936b238ff55b64628178572",
+      "packaged_sha256": "4be336ca4d3ef6bf7f29312a461a4ff877990d634936b238ff55b64628178572",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/asset-check.md",
+      "source_sha256": "ab48e589716b4a00a623e5d7b2905af237a1de5f922340a13a2bfd2de0bba9f8",
+      "packaged_sha256": "ab48e589716b4a00a623e5d7b2905af237a1de5f922340a13a2bfd2de0bba9f8",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/asset/INDEX.md",
+      "source_sha256": "a68a038a302581138ddb434c5fcac5e0aaaa9d953579b3c9192818a19030e5a1",
+      "packaged_sha256": "a68a038a302581138ddb434c5fcac5e0aaaa9d953579b3c9192818a19030e5a1",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/asset/get-evaluations.md",
+      "source_sha256": "97bb76097d87f916b655041ddefe66762b30eb4b46e06c4a83f693cfa1984758",
+      "packaged_sha256": "97bb76097d87f916b655041ddefe66762b30eb4b46e06c4a83f693cfa1984758",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/asset/get-events.md",
+      "source_sha256": "2d019a4c2fe957087db1af751306e51e0d5674ec6b537b3b6f9bffd785b37ec3",
+      "packaged_sha256": "2d019a4c2fe957087db1af751306e51e0d5674ec6b537b3b6f9bffd785b37ec3",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/asset/get-health.md",
+      "source_sha256": "d3428bac94ac93bab24e16cf0ad927b1d79d5391083f72b0432fdf901ac9b833",
+      "packaged_sha256": "d3428bac94ac93bab24e16cf0ad927b1d79d5391083f72b0432fdf901ac9b833",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/asset/get-partition-status.md",
+      "source_sha256": "efeafcd877cc991703898ee4ad4cb11aa27b9fc3102c2521285143e2e8ab8741",
+      "packaged_sha256": "efeafcd877cc991703898ee4ad4cb11aa27b9fc3102c2521285143e2e8ab8741",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/asset/get.md",
+      "source_sha256": "0116a675810992d7447078a603a4ddd9af8d9c0f8e023a969ca85db702595c49",
+      "packaged_sha256": "0116a675810992d7447078a603a4ddd9af8d9c0f8e023a969ca85db702595c49",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/asset/list.md",
+      "source_sha256": "af453a287d0516242c50edccbf361071ad78bde9a76b4a12d961fa3d12534355",
+      "packaged_sha256": "af453a287d0516242c50edccbf361071ad78bde9a76b4a12d961fa3d12534355",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/code-location/INDEX.md",
+      "source_sha256": "f52a70968126c297b08425f73271df425fc783ddbe6ac2ea549d6682b925625e",
+      "packaged_sha256": "f52a70968126c297b08425f73271df425fc783ddbe6ac2ea549d6682b925625e",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/code-location/add.md",
+      "source_sha256": "3398658ed79508b04d1e53caba0bf67237506a6adafe00fd1075f1a4cff89563",
+      "packaged_sha256": "3398658ed79508b04d1e53caba0bf67237506a6adafe00fd1075f1a4cff89563",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/code-location/delete.md",
+      "source_sha256": "1b469139d386434bf90c468bc85e5483dd3f68703e5bdb92a8ff88d0ae31b07c",
+      "packaged_sha256": "1b469139d386434bf90c468bc85e5483dd3f68703e5bdb92a8ff88d0ae31b07c",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/code-location/get.md",
+      "source_sha256": "72704c6001eb8eea3201505d7fb4fbbaa4aecd82a86a37d8b5707393e0c56af0",
+      "packaged_sha256": "72704c6001eb8eea3201505d7fb4fbbaa4aecd82a86a37d8b5707393e0c56af0",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/code-location/list.md",
+      "source_sha256": "4dc15d4c32f6cbefeb63edf77ed1ff75ac1a66bcc978fb6fcb37925422f4c17d",
+      "packaged_sha256": "4dc15d4c32f6cbefeb63edf77ed1ff75ac1a66bcc978fb6fcb37925422f4c17d",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/deployment/INDEX.md",
+      "source_sha256": "1f67b9b84ae32fd7a47da903f00fbdebe0dc3b0941fac95f7fa67758627c83a7",
+      "packaged_sha256": "1f67b9b84ae32fd7a47da903f00fbdebe0dc3b0941fac95f7fa67758627c83a7",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/deployment/delete.md",
+      "source_sha256": "c4b7ef28a66439bcfeb9f4299e528f50060b80f8f4e970367a8952d222390660",
+      "packaged_sha256": "c4b7ef28a66439bcfeb9f4299e528f50060b80f8f4e970367a8952d222390660",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/deployment/get.md",
+      "source_sha256": "87fad299d9ebc64280cf479a6d38ac94a9dab83181b03b8c1e898a910999ae93",
+      "packaged_sha256": "87fad299d9ebc64280cf479a6d38ac94a9dab83181b03b8c1e898a910999ae93",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/deployment/list.md",
+      "source_sha256": "dfdfd96e75cb88ec8ae70dd04846caec34882136152219392b9c42372e840c7f",
+      "packaged_sha256": "dfdfd96e75cb88ec8ae70dd04846caec34882136152219392b9c42372e840c7f",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/deployment/settings-get.md",
+      "source_sha256": "e4760bd86d1a47bf4de423e34dd903e52d5376d8997194fa8cb2ef67aa85367e",
+      "packaged_sha256": "e4760bd86d1a47bf4de423e34dd903e52d5376d8997194fa8cb2ef67aa85367e",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/deployment/settings-set.md",
+      "source_sha256": "dc998e2c96f9635edc93ff318e0993830e72d8e4726b7fa483515051220f5b7c",
+      "packaged_sha256": "dc998e2c96f9635edc93ff318e0993830e72d8e4726b7fa483515051220f5b7c",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/general.md",
+      "source_sha256": "eb8a302734a9a731ec1734cc8e3ebb8098034fc0af131be2c8a236753966ef35",
+      "packaged_sha256": "e6205944da66818651045bf6a1539678abfcc26b2a839b24b1128a45b729db17",
+      "adapted": true
+    },
+    {
+      "path": "references/cli/api/insights.md",
+      "source_sha256": "751d6d0aeb6a551d37b592083eb5640a2b949aa8bab37e338a14f78fb6bd6615",
+      "packaged_sha256": "751d6d0aeb6a551d37b592083eb5640a2b949aa8bab37e338a14f78fb6bd6615",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/issue/INDEX.md",
+      "source_sha256": "f382a285fdf4598b9c7bb50293f1841d35f67127dc0f279a14a589e3f1177f80",
+      "packaged_sha256": "f382a285fdf4598b9c7bb50293f1841d35f67127dc0f279a14a589e3f1177f80",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/job.md",
+      "source_sha256": "6a4e01efc0e031eb1e096e2a1d3d82b700333f76eaaac2416ff0b51a7fd34200",
+      "packaged_sha256": "6a4e01efc0e031eb1e096e2a1d3d82b700333f76eaaac2416ff0b51a7fd34200",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/organization/INDEX.md",
+      "source_sha256": "5c0353715331f96f925af78cf40217e2f878d646aa3ea7596e8ebec4e871f474",
+      "packaged_sha256": "5c0353715331f96f925af78cf40217e2f878d646aa3ea7596e8ebec4e871f474",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/organization/saml-remove.md",
+      "source_sha256": "56853e6f928eff3a9d1674b5ef84913516ad62f94e69c5e148d5827f9ed4e135",
+      "packaged_sha256": "56853e6f928eff3a9d1674b5ef84913516ad62f94e69c5e148d5827f9ed4e135",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/organization/saml-upload.md",
+      "source_sha256": "2b770b4ad95df6721464a65bb36f08fe152533cf331889a80a6c54860762ebd4",
+      "packaged_sha256": "2b770b4ad95df6721464a65bb36f08fe152533cf331889a80a6c54860762ebd4",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/organization/settings-get.md",
+      "source_sha256": "87912abd1742ba78d970c4dd81c272e9eec20516cbc3cb2305ea91ba1d0f0f08",
+      "packaged_sha256": "87912abd1742ba78d970c4dd81c272e9eec20516cbc3cb2305ea91ba1d0f0f08",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/organization/settings-set.md",
+      "source_sha256": "c1e88e061ab3fa58c5b8c939b03fd70cf34eeb7d70cfb8b5cbe6429a9d59e234",
+      "packaged_sha256": "c1e88e061ab3fa58c5b8c939b03fd70cf34eeb7d70cfb8b5cbe6429a9d59e234",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/run/INDEX.md",
+      "source_sha256": "72e24118ca4719782d5a3651d2c9034002af6328b887dfe72ac8f504311d17ab",
+      "packaged_sha256": "72e24118ca4719782d5a3651d2c9034002af6328b887dfe72ac8f504311d17ab",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/run/get-events.md",
+      "source_sha256": "c56fae1cb6644fc982f85ec32d890e16adffc21cbc030fe6e253b7b27e676ab5",
+      "packaged_sha256": "c56fae1cb6644fc982f85ec32d890e16adffc21cbc030fe6e253b7b27e676ab5",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/run/get-logs.md",
+      "source_sha256": "45fcc984f4b6c4fff085bd84748099f47307b8525129590d4c59052b4d051820",
+      "packaged_sha256": "45fcc984f4b6c4fff085bd84748099f47307b8525129590d4c59052b4d051820",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/run/get.md",
+      "source_sha256": "562dd6e2bf52545fd6d458eb731678be8decd2f179878b0e097db64ba62019b5",
+      "packaged_sha256": "562dd6e2bf52545fd6d458eb731678be8decd2f179878b0e097db64ba62019b5",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/run/launch.md",
+      "source_sha256": "4d63a25b3c1f395fb90290a7689ed60dee3fec731ba0b69a46434e2be5f75f54",
+      "packaged_sha256": "4d63a25b3c1f395fb90290a7689ed60dee3fec731ba0b69a46434e2be5f75f54",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/run/list.md",
+      "source_sha256": "4df27d1230e0a9ea6313d298d659ec33b1961df566fab244cb8e679fa2b4c131",
+      "packaged_sha256": "4df27d1230e0a9ea6313d298d659ec33b1961df566fab244cb8e679fa2b4c131",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/schedule/INDEX.md",
+      "source_sha256": "f0d21b7804cbfa27767edb4b9eae8636dc2591e8032392a25ca48b7de42139f1",
+      "packaged_sha256": "f0d21b7804cbfa27767edb4b9eae8636dc2591e8032392a25ca48b7de42139f1",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/schedule/get-ticks.md",
+      "source_sha256": "8eddb20f6d11757537170733a71d534b4f81f49ca9991f4f39be1e8d772bb91d",
+      "packaged_sha256": "8eddb20f6d11757537170733a71d534b4f81f49ca9991f4f39be1e8d772bb91d",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/schedule/get.md",
+      "source_sha256": "5376af831731f0cd78b8c3d0a86b6f060b522a48dc6150e71de99f4e09eee59b",
+      "packaged_sha256": "5376af831731f0cd78b8c3d0a86b6f060b522a48dc6150e71de99f4e09eee59b",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/schedule/list.md",
+      "source_sha256": "c37e7b4596f6aec515a42e8601ebbf1e21cc99d76ccea6c6e4f03c79a65e8bdc",
+      "packaged_sha256": "c37e7b4596f6aec515a42e8601ebbf1e21cc99d76ccea6c6e4f03c79a65e8bdc",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/secret/INDEX.md",
+      "source_sha256": "5e9fe6f50e426fa7db406ad9b5271bac0bcde26fb4a8908e0bca7aa48acb7314",
+      "packaged_sha256": "5e9fe6f50e426fa7db406ad9b5271bac0bcde26fb4a8908e0bca7aa48acb7314",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/secret/get.md",
+      "source_sha256": "9e6ce57610a956d0d04dc7de4170271b6b568b023ce13764fb5da94fa3bd7ad0",
+      "packaged_sha256": "9e6ce57610a956d0d04dc7de4170271b6b568b023ce13764fb5da94fa3bd7ad0",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/secret/list.md",
+      "source_sha256": "0b3322444f34bb48f43aca8450b9203bbb78e6b0e24fe153c47a987b7d17725a",
+      "packaged_sha256": "0b3322444f34bb48f43aca8450b9203bbb78e6b0e24fe153c47a987b7d17725a",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/sensor/INDEX.md",
+      "source_sha256": "e6661a0cbd003fc00f688f0a7afb840ac5d6c5b0f88f266087c2b81dd6fbe047",
+      "packaged_sha256": "e6661a0cbd003fc00f688f0a7afb840ac5d6c5b0f88f266087c2b81dd6fbe047",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/sensor/get-ticks.md",
+      "source_sha256": "cfed490ab4dc54555fcdde0701305557d04bfcfc7cb90cdd7fd8be495210f574",
+      "packaged_sha256": "cfed490ab4dc54555fcdde0701305557d04bfcfc7cb90cdd7fd8be495210f574",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/sensor/get.md",
+      "source_sha256": "b50485ffbf8b08f533745ce71b771c49fdae96b76400d15bb0049adea59d7fc5",
+      "packaged_sha256": "b50485ffbf8b08f533745ce71b771c49fdae96b76400d15bb0049adea59d7fc5",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/api/sensor/list.md",
+      "source_sha256": "08abb2616b9e370baa409fd98b40886427c0ad501e169b8d55c4ad9442bc04ac",
+      "packaged_sha256": "08abb2616b9e370baa409fd98b40886427c0ad501e169b8d55c4ad9442bc04ac",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/check.md",
+      "source_sha256": "cbd4b38fd5a3bc131da634324275c0486bbad42ec6ebf191bb94033ee11fa026",
+      "packaged_sha256": "cbd4b38fd5a3bc131da634324275c0486bbad42ec6ebf191bb94033ee11fa026",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/create-dagster.md",
+      "source_sha256": "16c1214638ce2d716025e32e411babed729627b6bfd74d974fec7cb8f8ef25be",
+      "packaged_sha256": "16c1214638ce2d716025e32e411babed729627b6bfd74d974fec7cb8f8ef25be",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/dev.md",
+      "source_sha256": "82944a17401a5960bc9add51c602b73b6c1429c86707287bbd885593799ad0ad",
+      "packaged_sha256": "82944a17401a5960bc9add51c602b73b6c1429c86707287bbd885593799ad0ad",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/launch.md",
+      "source_sha256": "bb555aa12adbda328cdf23113999a920ea29847719ceee0ac70d23ffee0fd983",
+      "packaged_sha256": "a55944bc7460cd528630d978d423b3bd0b67c2a670f8ff58ea4c1af9fc99ee06",
+      "adapted": true
+    },
+    {
+      "path": "references/cli/list-components.md",
+      "source_sha256": "5c0bdb771bf1f163424bbb817a677aa2e671808766059c2ba4f5adc99e92ef4f",
+      "packaged_sha256": "5c0bdb771bf1f163424bbb817a677aa2e671808766059c2ba4f5adc99e92ef4f",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/list-defs.md",
+      "source_sha256": "5b976bfad3008e0eeebd230f8e0daf8419a835848b3510af466a2dbaf5cd91b3",
+      "packaged_sha256": "5b976bfad3008e0eeebd230f8e0daf8419a835848b3510af466a2dbaf5cd91b3",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/list/INDEX.md",
+      "source_sha256": "da2fdba0903dab2af1ef3e12c7068755bd1e1bf4021f47e389cdc6e10f0d18f8",
+      "packaged_sha256": "da2fdba0903dab2af1ef3e12c7068755bd1e1bf4021f47e389cdc6e10f0d18f8",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/list/component-tree.md",
+      "source_sha256": "7f3f5e50934f0fe3d5f69ad3226a52ee2dfc898d5c9fed6f646f50ca21d7bc14",
+      "packaged_sha256": "7f3f5e50934f0fe3d5f69ad3226a52ee2dfc898d5c9fed6f646f50ca21d7bc14",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/list/envs.md",
+      "source_sha256": "02862d9fdda5124756ecdcd9af846270399de91acfd42bbdd96c6e9526fa7cb4",
+      "packaged_sha256": "02862d9fdda5124756ecdcd9af846270399de91acfd42bbdd96c6e9526fa7cb4",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/list/projects.md",
+      "source_sha256": "b9827753f9d4813194eeb8ec8d4960d96308cedf71fc93a43817332e56699f82",
+      "packaged_sha256": "b9827753f9d4813194eeb8ec8d4960d96308cedf71fc93a43817332e56699f82",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/plus/INDEX.md",
+      "source_sha256": "e8b5b1520be3d1497a2dc5c6f54cda3bf9f4ad5e8686987be86c2af3ecbe7cf1",
+      "packaged_sha256": "e8b5b1520be3d1497a2dc5c6f54cda3bf9f4ad5e8686987be86c2af3ecbe7cf1",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/plus/config/set.md",
+      "source_sha256": "43b78f98327553298300b77b94f099e5bc62e731d80a3c3c46a357511e9a551f",
+      "packaged_sha256": "43b78f98327553298300b77b94f099e5bc62e731d80a3c3c46a357511e9a551f",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/plus/config/view.md",
+      "source_sha256": "479ba1d6d9c108b57d097a539b06312621cd8fa00da432ad452685df08f8f3ef",
+      "packaged_sha256": "479ba1d6d9c108b57d097a539b06312621cd8fa00da432ad452685df08f8f3ef",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/plus/create/ci-api-token.md",
+      "source_sha256": "063ff595fceff163c78a87ae60530d281c0f386dc7dad2688afb71fab63d6337",
+      "packaged_sha256": "063ff595fceff163c78a87ae60530d281c0f386dc7dad2688afb71fab63d6337",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/plus/deploy/configure.md",
+      "source_sha256": "5ab1967bc396ee1dea4c6bc8190a39acffb2091264a9f8f67afc207979c8a220",
+      "packaged_sha256": "5ab1967bc396ee1dea4c6bc8190a39acffb2091264a9f8f67afc207979c8a220",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/plus/deploy/deploy.md",
+      "source_sha256": "bc67b9b24f0f8ab32f421bc478cd7a0e17189ef0f2f3dbad04814657d1a5b372",
+      "packaged_sha256": "bc67b9b24f0f8ab32f421bc478cd7a0e17189ef0f2f3dbad04814657d1a5b372",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/plus/integrations/dbt.md",
+      "source_sha256": "865183ebc73d4b5ceea5fc0d41aebe61eb0c534b978c6b54aaba3511cb02a03d",
+      "packaged_sha256": "865183ebc73d4b5ceea5fc0d41aebe61eb0c534b978c6b54aaba3511cb02a03d",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/plus/login.md",
+      "source_sha256": "323b7ba349024fb4692f5cda31e15e3967572ad76932cfad50d40159a5fc10bb",
+      "packaged_sha256": "323b7ba349024fb4692f5cda31e15e3967572ad76932cfad50d40159a5fc10bb",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/plus/pull/env.md",
+      "source_sha256": "d2b9f642b22ccb0deffd6131fdfbf1545dd66d01ecb0b5c9589b54ae1a8c4297",
+      "packaged_sha256": "d2b9f642b22ccb0deffd6131fdfbf1545dd66d01ecb0b5c9589b54ae1a8c4297",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/scaffold/component.md",
+      "source_sha256": "1f4109568abd8d72915f7e35e13fa0eb618b7fd1c8a060415df2611bc71d9ffe",
+      "packaged_sha256": "1f4109568abd8d72915f7e35e13fa0eb618b7fd1c8a060415df2611bc71d9ffe",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/scaffold/defs.md",
+      "source_sha256": "3331f6c5b0aa499d72d35e3775a32cb412c1a1d8886396d502454192d08682b9",
+      "packaged_sha256": "3331f6c5b0aa499d72d35e3775a32cb412c1a1d8886396d502454192d08682b9",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/utils/INDEX.md",
+      "source_sha256": "e2c52eb65319356f29b3ec1494c7fd3658527f2f084c6b3421f6167533545813",
+      "packaged_sha256": "e2c52eb65319356f29b3ec1494c7fd3658527f2f084c6b3421f6167533545813",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/utils/inspect-component.md",
+      "source_sha256": "5a6f3b207becf09b532ba12b675b21a8428e12ea20b91826c7a3f4a8a0354644",
+      "packaged_sha256": "5a6f3b207becf09b532ba12b675b21a8428e12ea20b91826c7a3f4a8a0354644",
+      "adapted": false
+    },
+    {
+      "path": "references/cli/utils/refresh-defs-state.md",
+      "source_sha256": "79fc5a9739c21b6c2135dd795c1f98cf3c9effcc49258b0c0f77124b1c1bba65",
+      "packaged_sha256": "79fc5a9739c21b6c2135dd795c1f98cf3c9effcc49258b0c0f77124b1c1bba65",
+      "adapted": false
+    },
+    {
+      "path": "references/components/creating-components.md",
+      "source_sha256": "9605e168515cd6d37a64a3f7a6f0a593918805b5e4976468c465a6eaa933e6f1",
+      "packaged_sha256": "6d8f1d31358a070500f4cbc708e1ec8ac08afab5fe4c84fd27e55baeb0cec091",
+      "adapted": true
+    },
+    {
+      "path": "references/components/designing-component-integrations.md",
+      "source_sha256": "0d623b0ee5ed13f4f481a638ae76edbc1758fd4923fa905ce40f174e7b1819e1",
+      "packaged_sha256": "0d623b0ee5ed13f4f481a638ae76edbc1758fd4923fa905ce40f174e7b1819e1",
+      "adapted": false
+    },
+    {
+      "path": "references/components/resolved-framework.md",
+      "source_sha256": "cf29cda58ef5dd6fc3876a0bdf17510429338e93e3e77751b372349598e636eb",
+      "packaged_sha256": "cf29cda58ef5dd6fc3876a0bdf17510429338e93e3e77751b372349598e636eb",
+      "adapted": false
+    },
+    {
+      "path": "references/components/state-backed/creating.md",
+      "source_sha256": "fd0108385e6d319d80404dc0ac0381a34edd6044aa00009d5c0042f8e1517770",
+      "packaged_sha256": "fd0108385e6d319d80404dc0ac0381a34edd6044aa00009d5c0042f8e1517770",
+      "adapted": false
+    },
+    {
+      "path": "references/components/state-backed/using.md",
+      "source_sha256": "c28922736b9ae85b543ef9f7dc062552b95569d11b01e5c6c078f768acd6dfb0",
+      "packaged_sha256": "c28922736b9ae85b543ef9f7dc062552b95569d11b01e5c6c078f768acd6dfb0",
+      "adapted": false
+    },
+    {
+      "path": "references/components/subclassing-components.md",
+      "source_sha256": "10a737cd415a8b62b4051515bf8a308a2da1ffc3d04dd0cce1afa87b2c022245",
+      "packaged_sha256": "10a737cd415a8b62b4051515bf8a308a2da1ffc3d04dd0cce1afa87b2c022245",
+      "adapted": false
+    },
+    {
+      "path": "references/components/template-variables.md",
+      "source_sha256": "547af1ff1bb0384f65321f952789c8598839687028e87b6206e14b0ca5be8013",
+      "packaged_sha256": "547af1ff1bb0384f65321f952789c8598839687028e87b6206e14b0ca5be8013",
+      "adapted": false
+    },
+    {
+      "path": "references/deployment/config-files.md",
+      "source_sha256": "be8b50e113dfc0bd0e44ca39004c783dc429f14b2fd04ef083bb4b366ec6af34",
+      "packaged_sha256": "be8b50e113dfc0bd0e44ca39004c783dc429f14b2fd04ef083bb4b366ec6af34",
+      "adapted": false
+    },
+    {
+      "path": "references/env-vars.md",
+      "source_sha256": "e1881e1e9126139533f8fdfa15f81a966370b35624b8e6dc257f047e77a7d314",
+      "packaged_sha256": "e1881e1e9126139533f8fdfa15f81a966370b35624b8e6dc257f047e77a7d314",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/INDEX.md",
+      "source_sha256": "ea37578c52d718764fdec68c421d7bb9467aa350cfa3e3b82a2512698693d279",
+      "packaged_sha256": "ea37578c52d718764fdec68c421d7bb9467aa350cfa3e3b82a2512698693d279",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-airbyte/INDEX.md",
+      "source_sha256": "1c2d1d6b5af35c3434b3d8e7b3391c5b0317308521d073d781758a2981b0e60c",
+      "packaged_sha256": "1c2d1d6b5af35c3434b3d8e7b3391c5b0317308521d073d781758a2981b0e60c",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-airlift/INDEX.md",
+      "source_sha256": "746dd46bb8c8fada4c17a4518a58c06a0724696f390da4536045ce8ae4e31b12",
+      "packaged_sha256": "746dd46bb8c8fada4c17a4518a58c06a0724696f390da4536045ce8ae4e31b12",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-aws/INDEX.md",
+      "source_sha256": "550d8a632dfb921f673ddb70833fb45af4b94c3601d9b7764935102e60f78bff",
+      "packaged_sha256": "550d8a632dfb921f673ddb70833fb45af4b94c3601d9b7764935102e60f78bff",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-azure/INDEX.md",
+      "source_sha256": "5cd884cc8228c8a9b23256579e768a9847bda5f20a62b74ade65fc9f361ca6b4",
+      "packaged_sha256": "5cd884cc8228c8a9b23256579e768a9847bda5f20a62b74ade65fc9f361ca6b4",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-celery-docker/INDEX.md",
+      "source_sha256": "ec2710e24bb5b286e5739830315303cff695cb4fda7765f1e341e9af5da89750",
+      "packaged_sha256": "ec2710e24bb5b286e5739830315303cff695cb4fda7765f1e341e9af5da89750",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-celery-k8s/INDEX.md",
+      "source_sha256": "87baaefa756d1465e5242d111f10677eb91204ef332f30189558e9ef545efd3d",
+      "packaged_sha256": "87baaefa756d1465e5242d111f10677eb91204ef332f30189558e9ef545efd3d",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-celery/INDEX.md",
+      "source_sha256": "64f7fce048836b7c3bb9355b13499169ee6eec3c0eb53757cda4656e45713cb9",
+      "packaged_sha256": "64f7fce048836b7c3bb9355b13499169ee6eec3c0eb53757cda4656e45713cb9",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-census/INDEX.md",
+      "source_sha256": "259cfca91ca18c350aec53d7516a353a68685d57d93e3d414e21574401081bee",
+      "packaged_sha256": "259cfca91ca18c350aec53d7516a353a68685d57d93e3d414e21574401081bee",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-dask/INDEX.md",
+      "source_sha256": "121c89d27247d0c8dbb47f561e5f544ae551d7a704f2caea0b0ded3921883334",
+      "packaged_sha256": "121c89d27247d0c8dbb47f561e5f544ae551d7a704f2caea0b0ded3921883334",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-databricks/INDEX.md",
+      "source_sha256": "ab8fc22339032efea6c6dcb72f381740f63f741309d9d0ed9531533a1b1ce467",
+      "packaged_sha256": "ab8fc22339032efea6c6dcb72f381740f63f741309d9d0ed9531533a1b1ce467",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-datadog/INDEX.md",
+      "source_sha256": "0ae96a35c8d24a96d6e7701952e06531707b0f2b75b8253f75a17c270bd6060d",
+      "packaged_sha256": "0ae96a35c8d24a96d6e7701952e06531707b0f2b75b8253f75a17c270bd6060d",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-datahub/INDEX.md",
+      "source_sha256": "1296f38edbb2052e6921ebb8229ea1601de15e7b6585f905d358db8a3716acb8",
+      "packaged_sha256": "1296f38edbb2052e6921ebb8229ea1601de15e7b6585f905d358db8a3716acb8",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-dbt/INDEX.md",
+      "source_sha256": "e4eb8e2cda659412b54abee2d1acda3c710a7d9201fd9ac366efc6b300502eee",
+      "packaged_sha256": "e4eb8e2cda659412b54abee2d1acda3c710a7d9201fd9ac366efc6b300502eee",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-dbt/asset-checks.md",
+      "source_sha256": "04298d480dc262f0a2c1cd9b1c1425b6f8846af2240c31f0716188634bfe47c2",
+      "packaged_sha256": "04298d480dc262f0a2c1cd9b1c1425b6f8846af2240c31f0716188634bfe47c2",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-dbt/component-based-integration.md",
+      "source_sha256": "df064f7b1ade63084e752ffde11a2e2bc0c50d4e0f57e6d1ddd67ea3c7f49395",
+      "packaged_sha256": "df064f7b1ade63084e752ffde11a2e2bc0c50d4e0f57e6d1ddd67ea3c7f49395",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-dbt/dbt-cloud.md",
+      "source_sha256": "39f10603c392ca323d8af6d17ec17f0dc462ced98edc66da9de0436ef032f207",
+      "packaged_sha256": "39f10603c392ca323d8af6d17ec17f0dc462ced98edc66da9de0436ef032f207",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-dbt/dependencies.md",
+      "source_sha256": "adbbdc3c57712f14cb38272d925d203c5900e79b65ba61ca286507cac0e56acf",
+      "packaged_sha256": "adbbdc3c57712f14cb38272d925d203c5900e79b65ba61ca286507cac0e56acf",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-dbt/pythonic-integration.md",
+      "source_sha256": "fe749fa8a3053cdb6ae344e8874c8b6c47e7671672d2b73bb2cc5505bf3fa62e",
+      "packaged_sha256": "fe749fa8a3053cdb6ae344e8874c8b6c47e7671672d2b73bb2cc5505bf3fa62e",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-dbt/scaffolding.md",
+      "source_sha256": "22e6b31a81f1aaff08afbdfd05a170ef5ee8bdb2fe6b3c30ee5b7367052501b3",
+      "packaged_sha256": "22e6b31a81f1aaff08afbdfd05a170ef5ee8bdb2fe6b3c30ee5b7367052501b3",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-deltalake-pandas/INDEX.md",
+      "source_sha256": "a2eab9bcbbdec9cbc669a572bf424b55db7f471b9c87c700e7be6ba85ffe4bc7",
+      "packaged_sha256": "a2eab9bcbbdec9cbc669a572bf424b55db7f471b9c87c700e7be6ba85ffe4bc7",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-deltalake-polars/INDEX.md",
+      "source_sha256": "f36ad449da60a009700a0892c9e3b86ae5ebd44e34bea685a71da10d7ffe5537",
+      "packaged_sha256": "f36ad449da60a009700a0892c9e3b86ae5ebd44e34bea685a71da10d7ffe5537",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-deltalake/INDEX.md",
+      "source_sha256": "0da80577192075284e02e9e059e155e45bce97cae54dc3f67d2b15e3e00d9ab7",
+      "packaged_sha256": "0da80577192075284e02e9e059e155e45bce97cae54dc3f67d2b15e3e00d9ab7",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-dlt/INDEX.md",
+      "source_sha256": "b95402381d6a050f52e93924b1ff61c50232d6ce696bd3dcb082288435848296",
+      "packaged_sha256": "b95402381d6a050f52e93924b1ff61c50232d6ce696bd3dcb082288435848296",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-docker/INDEX.md",
+      "source_sha256": "07520bf220eb05051a182d9f6b4d1a5d6c91dc87b0beccb91326edbf39466a64",
+      "packaged_sha256": "07520bf220eb05051a182d9f6b4d1a5d6c91dc87b0beccb91326edbf39466a64",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-duckdb-pandas/INDEX.md",
+      "source_sha256": "877def263303dfc49a87f85828d2cfff3e8e872676deaf5c6d9cfbadf3289623",
+      "packaged_sha256": "877def263303dfc49a87f85828d2cfff3e8e872676deaf5c6d9cfbadf3289623",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-duckdb-polars/INDEX.md",
+      "source_sha256": "e1835126df18d11b893913096b7591d359bca4417817df49ae73f9dd1c2431ce",
+      "packaged_sha256": "e1835126df18d11b893913096b7591d359bca4417817df49ae73f9dd1c2431ce",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-duckdb-pyspark/INDEX.md",
+      "source_sha256": "cce7afe15ed9d10623bd7830b5e0db7061be9cdacc9762f1bcd6fc3a3118f45b",
+      "packaged_sha256": "cce7afe15ed9d10623bd7830b5e0db7061be9cdacc9762f1bcd6fc3a3118f45b",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-duckdb/INDEX.md",
+      "source_sha256": "2e846b7ea816a46a7651846b14eb3046ce206ebe6f81dc4e2c1641d2f33f288c",
+      "packaged_sha256": "2e846b7ea816a46a7651846b14eb3046ce206ebe6f81dc4e2c1641d2f33f288c",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-fivetran/INDEX.md",
+      "source_sha256": "36d81da69226986810566c64af0e30a46fdc60c8084ba53ee9a0768ba94bcdb6",
+      "packaged_sha256": "36d81da69226986810566c64af0e30a46fdc60c8084ba53ee9a0768ba94bcdb6",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-gcp-pandas/INDEX.md",
+      "source_sha256": "afed322486f6e1e55c23f972e0e1e148ffca7b19f44008d931a4281a238f4f18",
+      "packaged_sha256": "afed322486f6e1e55c23f972e0e1e148ffca7b19f44008d931a4281a238f4f18",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-gcp-pyspark/INDEX.md",
+      "source_sha256": "8fbb7c6bdddc6eb3e7449ac39a8eb40b9c6846ff7a735e624426e3f221d1bea6",
+      "packaged_sha256": "8fbb7c6bdddc6eb3e7449ac39a8eb40b9c6846ff7a735e624426e3f221d1bea6",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-gcp/INDEX.md",
+      "source_sha256": "e3ecb90911c03a684b2d624de86dea921eade66f569de80eb3fd7323e4108dc9",
+      "packaged_sha256": "e3ecb90911c03a684b2d624de86dea921eade66f569de80eb3fd7323e4108dc9",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-github/INDEX.md",
+      "source_sha256": "ba0befd9345bc64fc138800229e4d80d496baa0d0edfe1dd8c46c26706180c36",
+      "packaged_sha256": "ba0befd9345bc64fc138800229e4d80d496baa0d0edfe1dd8c46c26706180c36",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-great-expectations/INDEX.md",
+      "source_sha256": "9e8d4f10ccfcad3a418dcd61f51ef55705e717ab31331cef9071177cc7f59143",
+      "packaged_sha256": "9e8d4f10ccfcad3a418dcd61f51ef55705e717ab31331cef9071177cc7f59143",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-hightouch/INDEX.md",
+      "source_sha256": "f54a2561257163eb774ec386f654f7bd0b32ab8ffbf5d42b4cc6974d0e97599b",
+      "packaged_sha256": "f54a2561257163eb774ec386f654f7bd0b32ab8ffbf5d42b4cc6974d0e97599b",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-iceberg/INDEX.md",
+      "source_sha256": "54174bdcc24cc390e80e3c0fabb50986418934fed5b46f0d511411fa3f8bc471",
+      "packaged_sha256": "54174bdcc24cc390e80e3c0fabb50986418934fed5b46f0d511411fa3f8bc471",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-jupyter/INDEX.md",
+      "source_sha256": "d9c3cd5a591f5cc159247b3decc24bf39225864a0c8b33acbaa9fc6cfef7e8ec",
+      "packaged_sha256": "d9c3cd5a591f5cc159247b3decc24bf39225864a0c8b33acbaa9fc6cfef7e8ec",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-k8s/INDEX.md",
+      "source_sha256": "ba69a9b08ac695ad32608d0ca55ec4373bd8a4ea62fc915143a73346becadc75",
+      "packaged_sha256": "ba69a9b08ac695ad32608d0ca55ec4373bd8a4ea62fc915143a73346becadc75",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-looker/INDEX.md",
+      "source_sha256": "85b7618673add616c9a796b2bc9ad993f506ce4c3c2f6a5c598b770a813c4164",
+      "packaged_sha256": "85b7618673add616c9a796b2bc9ad993f506ce4c3c2f6a5c598b770a813c4164",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-mlflow/INDEX.md",
+      "source_sha256": "e62489b77d54258be69c2164307d40f83c5270fe2bd175923f4298111d073b34",
+      "packaged_sha256": "e62489b77d54258be69c2164307d40f83c5270fe2bd175923f4298111d073b34",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-msteams/INDEX.md",
+      "source_sha256": "b420945d8ecf2d59498183317d5e2a84b2a4ada8f804ef3820413c838575ed5a",
+      "packaged_sha256": "b420945d8ecf2d59498183317d5e2a84b2a4ada8f804ef3820413c838575ed5a",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-mysql/INDEX.md",
+      "source_sha256": "d3cafaa2a2e8f53311676b23353ff16658c51460af9b436f7973898c80c56fc9",
+      "packaged_sha256": "d3cafaa2a2e8f53311676b23353ff16658c51460af9b436f7973898c80c56fc9",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-omni/INDEX.md",
+      "source_sha256": "4d4c027509bdae9b7fbe5b64cdbce029b349e62da59867492db7349e04a22ee9",
+      "packaged_sha256": "4d4c027509bdae9b7fbe5b64cdbce029b349e62da59867492db7349e04a22ee9",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-openai/INDEX.md",
+      "source_sha256": "a64e9edd11ddf1cdc8d460abcbf8ed5a5f7fa00deac1fb3c117e41999ae671de",
+      "packaged_sha256": "a64e9edd11ddf1cdc8d460abcbf8ed5a5f7fa00deac1fb3c117e41999ae671de",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-pagerduty/INDEX.md",
+      "source_sha256": "1502b02dab9b9e3a06089d15d5c66b44cab7381444689b9e65b1149084dbe395",
+      "packaged_sha256": "1502b02dab9b9e3a06089d15d5c66b44cab7381444689b9e65b1149084dbe395",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-pandas/INDEX.md",
+      "source_sha256": "5efb028d172f5fc2b1b6fa55b3a046652e0b880db891f66c30a4b02017da9fb2",
+      "packaged_sha256": "5efb028d172f5fc2b1b6fa55b3a046652e0b880db891f66c30a4b02017da9fb2",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-pandera/INDEX.md",
+      "source_sha256": "c3b9a088c373322964ea46bce976d4d2796f3e8cca657437dafa61d54b0f831e",
+      "packaged_sha256": "c3b9a088c373322964ea46bce976d4d2796f3e8cca657437dafa61d54b0f831e",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-papertrail/INDEX.md",
+      "source_sha256": "9c1f74f69da513824ab3284dee5fc79eb2449fa63da8c89ab718e7b37e241777",
+      "packaged_sha256": "9c1f74f69da513824ab3284dee5fc79eb2449fa63da8c89ab718e7b37e241777",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-polars/INDEX.md",
+      "source_sha256": "6b5d46ff6acea26bec25538fca3430306dccc95703e0a478fd0376d50a2e9a65",
+      "packaged_sha256": "6b5d46ff6acea26bec25538fca3430306dccc95703e0a478fd0376d50a2e9a65",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-polytomic/INDEX.md",
+      "source_sha256": "7fb9c793fe5abadd02dc1331d91d59af3d5d17585f32668378caf559752760c0",
+      "packaged_sha256": "7fb9c793fe5abadd02dc1331d91d59af3d5d17585f32668378caf559752760c0",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-postgres/INDEX.md",
+      "source_sha256": "32607c91aba7a9a4812a8b36ea2cc57e41a0919c2b325cc08e9f1f45ff7d1b12",
+      "packaged_sha256": "32607c91aba7a9a4812a8b36ea2cc57e41a0919c2b325cc08e9f1f45ff7d1b12",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-powerbi/INDEX.md",
+      "source_sha256": "031819ab33a653185c8ac37c7ca7f101839422fc955447b1af063ea3287ef35f",
+      "packaged_sha256": "031819ab33a653185c8ac37c7ca7f101839422fc955447b1af063ea3287ef35f",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-prometheus/INDEX.md",
+      "source_sha256": "c804bd57035b43a4f2ed4084d0b7073498b8ccd2e29380bac3cc688e5dc5a2f2",
+      "packaged_sha256": "c804bd57035b43a4f2ed4084d0b7073498b8ccd2e29380bac3cc688e5dc5a2f2",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-pyspark/INDEX.md",
+      "source_sha256": "049a9b33e7ae4d8f2f0da66e29e7053015e2752c7105e9f8b0d170a8d1cfc632",
+      "packaged_sha256": "049a9b33e7ae4d8f2f0da66e29e7053015e2752c7105e9f8b0d170a8d1cfc632",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-sigma/INDEX.md",
+      "source_sha256": "94a0c1612476c5d18cbd39f8a5157ef4e5fedd6efc2f90bd64acf0629d8647aa",
+      "packaged_sha256": "94a0c1612476c5d18cbd39f8a5157ef4e5fedd6efc2f90bd64acf0629d8647aa",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-slack/INDEX.md",
+      "source_sha256": "b6793a2eec30aa82583c62e07778f0d67fd7c2f19cd55c460ec1253004d98dd3",
+      "packaged_sha256": "b6793a2eec30aa82583c62e07778f0d67fd7c2f19cd55c460ec1253004d98dd3",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-sling/INDEX.md",
+      "source_sha256": "34f40b55f2c3b16402e69eee783c7d2259b086b9ab48d4ba363e640af5cdc16a",
+      "packaged_sha256": "34f40b55f2c3b16402e69eee783c7d2259b086b9ab48d4ba363e640af5cdc16a",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-snowflake-pandas/INDEX.md",
+      "source_sha256": "215b505bc8dc5e1fd9034bab35f656414b662378296ea3a78afba1e71720c940",
+      "packaged_sha256": "215b505bc8dc5e1fd9034bab35f656414b662378296ea3a78afba1e71720c940",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-snowflake-polars/INDEX.md",
+      "source_sha256": "45f5851db2447c9992b5262cf25def92a9bd16761dbd2a37bc0bdb70bbb96102",
+      "packaged_sha256": "45f5851db2447c9992b5262cf25def92a9bd16761dbd2a37bc0bdb70bbb96102",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-snowflake-pyspark/INDEX.md",
+      "source_sha256": "99f61220020005bcdc0b3a3a96194033cf0c8cd1b0a858ff324c8076e9139eb1",
+      "packaged_sha256": "99f61220020005bcdc0b3a3a96194033cf0c8cd1b0a858ff324c8076e9139eb1",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-snowflake/INDEX.md",
+      "source_sha256": "28541520f37a5e0cb1f4df29ce6b80c27ef350a433fdd552b82896068e7dcd5c",
+      "packaged_sha256": "28541520f37a5e0cb1f4df29ce6b80c27ef350a433fdd552b82896068e7dcd5c",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-spark/INDEX.md",
+      "source_sha256": "6e646ea55a87c7a4da0d95967259ad9ddfb8a5ae3fd974512e112e2f4eb88d9e",
+      "packaged_sha256": "6e646ea55a87c7a4da0d95967259ad9ddfb8a5ae3fd974512e112e2f4eb88d9e",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-ssh/INDEX.md",
+      "source_sha256": "801ac87f8725e37f023883313be6fcffd50d4712f03afda19dde1df75fbdb3d5",
+      "packaged_sha256": "801ac87f8725e37f023883313be6fcffd50d4712f03afda19dde1df75fbdb3d5",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-tableau/INDEX.md",
+      "source_sha256": "0267f7781877619c00e30c4c3203434b8e9bae3c512e3558ef0ae53eca6c92c5",
+      "packaged_sha256": "0267f7781877619c00e30c4c3203434b8e9bae3c512e3558ef0ae53eca6c92c5",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-twilio/INDEX.md",
+      "source_sha256": "918326b0fe80aec07c24e04429ebe39f7b05098fb76e4d90d2a21f2216e0e023",
+      "packaged_sha256": "918326b0fe80aec07c24e04429ebe39f7b05098fb76e4d90d2a21f2216e0e023",
+      "adapted": false
+    },
+    {
+      "path": "references/integrations/dagster-wandb/INDEX.md",
+      "source_sha256": "58128aa0b6ca3a82d7622b0dadb8fdbff75972bed0df074a054cc3f269f78805",
+      "packaged_sha256": "58128aa0b6ca3a82d7622b0dadb8fdbff75972bed0df074a054cc3f269f78805",
+      "adapted": false
+    },
+    {
+      "path": "references/migration/INDEX.md",
+      "source_sha256": "de5c8bea088ed73a261aa80d4b884c93af4076f9b410f5e34819156514e6ff79",
+      "packaged_sha256": "de5c8bea088ed73a261aa80d4b884c93af4076f9b410f5e34819156514e6ff79",
+      "adapted": false
+    },
+    {
+      "path": "references/migration/sensors-to-declarative-automation.md",
+      "source_sha256": "b610bf6a37fa68d14917e1948bd6147cb79820578adb6224359ad3ddd09f0c02",
+      "packaged_sha256": "b610bf6a37fa68d14917e1948bd6147cb79820578adb6224359ad3ddd09f0c02",
+      "adapted": false
+    }
+  ]
+}
