@@ -8,15 +8,33 @@
 -- matching int_box_office_latest. Films not yet analysed are absent: the
 -- grain is the summary pipeline, not the full catalogue.
 --
--- Severity and frequency labels are NOT separate warehouse columns; they are
--- embedded at the end of the summary text and are deliberately not
--- re-extracted here (see stg_violence_gore_summary).
+-- Jev classification columns (severity, scores, confidence) come from
+-- int_violence_classification via LEFT JOIN on tmdb_id. That model is
+-- MotherDuck-only (prompt_jev requires AI functions) and is disabled on the
+-- dev-local duckdb target via the use_ai_functions project var, so the ref
+-- and join are emitted conditionally on the same var: on dev-local the
+-- classification columns are typed NULLs and the model still builds. Films
+-- without a classification (or any row on dev-local) carry NULL there.
 --
 -- Citations of the latest run are aggregated into a single
 -- semicolon-separated 'title: url' string (NULL when the run produced no
 -- citations). Citation order is not guaranteed; the column is display
 -- provenance only, not machine-parseable.
-with summary_latest as (
+{% if var('use_ai_functions', false) %}
+with classification as (
+    select
+        tmdb_id,
+        severity,
+        severity_score,
+        severity_confidence,
+        frequency,
+        frequency_score,
+        frequency_confidence
+    from {{ ref('int_violence_classification') }}
+),
+{% endif %}
+
+summary_latest as (
     select
         tmdb_id,
         title,
@@ -49,7 +67,26 @@ final as (
         summary_latest.model as summary_model,
         summary_latest.scraped_at,
         citations.citations
+        {% if var('use_ai_functions', false) %}
+        ,classification.severity
+        ,classification.severity_score
+        ,classification.severity_confidence
+        ,classification.frequency
+        ,classification.frequency_score
+        ,classification.frequency_confidence
+        {% else %}
+        ,cast(null as varchar) as severity
+        ,cast(null as double) as severity_score
+        ,cast(null as double) as severity_confidence
+        ,cast(null as varchar) as frequency
+        ,cast(null as double) as frequency_score
+        ,cast(null as double) as frequency_confidence
+        {% endif %}
     from summary_latest
+    {% if var('use_ai_functions', false) %}
+    left join classification
+        on summary_latest.tmdb_id = classification.tmdb_id
+    {% endif %}
     left join citations
         on summary_latest._dlt_id = citations._dlt_parent_id
 )
@@ -61,5 +98,11 @@ select
     final.summary,
     final.summary_model,
     final.scraped_at,
-    final.citations
+    final.citations,
+    final.severity,
+    final.severity_score,
+    final.severity_confidence,
+    final.frequency,
+    final.frequency_score,
+    final.frequency_confidence
 from final

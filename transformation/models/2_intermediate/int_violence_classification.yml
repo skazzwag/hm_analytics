@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: int_violence_classification
+    description: >
+      Jev-classified violence/gore severity and frequency for the latest
+      summary per movie (one row per tmdb_id; latest snapshot selected by
+      row_number() over scraped_at desc). A single prompt_jev() call per row
+      (questions form: both questions in one request, input sent once) returns
+      an ordered score rubric: severity_score and frequency_score are weighted
+      positions on a 0-3 scale (0 = first criterion, 3 = last), and the label
+      columns are the criterion nearest the rounded score. Confidence columns
+      (0-1, calibrated) express how certain the model is; there is NO
+      pre-build validation of the classification (user decision, 2026-11-14),
+      so low-confidence rows are the review surface. Criteria descriptions are
+      ported from the legacy ingestion prompt's label definitions (ADR 0003)
+      and can be tuned with a cheap bounded re-classification.
+      MotherDuck-only: prompt_jev() requires AI functions, so the model is
+      enabled via the use_ai_functions project var (true on MotherDuck
+      targets, false on dev-local duckdb, where prompt_jev fails). The
+      prompt_jev CTE is MATERIALIZED per the MotherDuck docs mandate and the
+      model is materialized as a table so the model is never re-evaluated per
+      query. The prompt_jev CTE is not unit-testable (it would invoke the
+      real function); data tests are gated to MotherDuck targets via the same
+      use_ai_functions var, since the model (and its rows) do not exist
+      elsewhere. classified_at is deterministic provenance: the scraped_at of
+      the classified summary, not the build wall clock.
+    columns:
+      - name: tmdb_id
+        data_type: integer
+        description: "TMDB movie ID (primary key of the classification grain; join key to movie_catalogue)"
+        data_tests:
+          - not_null:
+              config:
+                enabled: "{{ var('use_ai_functions') }}"
+      - name: title
+        data_type: varchar
+        description: "Movie title analysed"
+      - name: release_date
+        data_type: varchar
+        description: "Release date used to disambiguate the movie (YYYY-MM-DD)"
+      - name: summary
+        data_type: varchar
+        description: "Latest violence/gore summary text sent to prompt_jev as the classification input"
+      - name: severity
+        data_type: varchar
+        description: >
+          "Violence/gore severity label: Mild, Moderate, High or Extreme
+          (criterion nearest the rounded severity_score)"
+        data_tests:
+          - not_null:
+              config:
+                enabled: "{{ var('use_ai_functions') }}"
+      - name: severity_score
+        data_type: double
+        description: >
+          "Weighted position on the ordered severity rubric, 0-3 (0 = Mild,
+          3 = Extreme); values between integers sit between criteria"
+      - name: severity_confidence
+        data_type: double
+        description: >
+          "Calibrated model confidence (0-1) in the severity answer; low
+          values flag rows for review (no pre-build validation exists)"
+      - name: frequency
+        data_type: varchar
+        description: >
+          "Violence/gore frequency label: Isolated, Occasional, Frequent or
+          Pervasive (criterion nearest the rounded frequency_score)"
+        data_tests:
+          - not_null:
+              config:
+                enabled: "{{ var('use_ai_functions') }}"
+      - name: frequency_score
+        data_type: double
+        description: >
+          "Weighted position on the ordered frequency rubric, 0-3 (0 =
+          Isolated, 3 = Pervasive); values between integers sit between
+          criteria"
+      - name: frequency_confidence
+        data_type: double
+        description: >
+          "Calibrated model confidence (0-1) in the frequency answer; low
+          values flag rows for review (no pre-build validation exists)"
+      - name: classified_at
+        data_type: timestamp
+        description: >
+          "UTC scraped_at of the classified summary snapshot (deterministic
+          provenance for the classification, not the build time)"
+        data_tests:
+          - not_null:
+              config:
+                enabled: "{{ var('use_ai_functions') }}"

@@ -113,11 +113,14 @@ sources:
 
       - name: violence_gore_summary
         description: >
-          One row per analysed movie per run. Concise violence/gore summary
-          produced by the Mistral web-search pipeline; append-only. The
-          summary text ends with one severity and one frequency label (see
-          the pipeline prompt); they are not separate columns. tmdb_id joins
-          to movie_catalogue. Citations live in the
+          One row per analysed movie per run. Concise, label-free
+          violence/gore summary produced by the Mistral web-search pipeline;
+          append-only. Historical rows may have severity/frequency labels
+          embedded in the text (legacy prompt); the current prompt strips
+          them. Classification (severity/frequency, 0-3 score scale with
+          calibrated confidence) is provided by int_violence_classification
+          (Jev prompt_jev), not by text extraction. tmdb_id joins to
+          movie_catalogue. Citations live in the
           violence_gore_summary__citations child table.
         columns:
           - name: tmdb_id
@@ -134,9 +137,12 @@ sources:
           - name: summary
             data_type: varchar
             description: >
-              Concise violence/gore summary text ending with exactly one
-              severity label (Mild, Moderate, High, Extreme) and one
-              frequency label (Isolated, Occasional, Frequent, Pervasive).
+              Concise, label-free violence/gore summary text. Historical rows
+              may end with one severity label (Mild, Moderate, High, Extreme)
+              and one frequency label (Isolated, Occasional, Frequent,
+              Pervasive) from the legacy prompt; the current prompt strips
+              these labels. Classification comes from
+              int_violence_classification, not text extraction.
           - name: model
             data_type: varchar
             description: Mistral model used for the analysis

@@ -51,6 +51,11 @@ seeds:
 tests:
   +store_failures: "{{ target.name == 'prod' }}"
 
+vars:
+  # MotherDuck AI functions (prompt_jev) gate. Documented default is true
+  # (MotherDuck targets); dev-local duckdb overrides to false via target logic.
+  use_ai_functions: true
+
 dispatch:
   - macro_namespace: dbt
     search_order:
