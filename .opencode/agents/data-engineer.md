@@ -8,10 +8,10 @@ permission:
   edit:
     '*': deny
     ingestion/**: allow
+    .dlt/**: allow
     .github/**: allow
     docker-compose.yaml: allow
     Makefile: allow
-    partner_api/**: allow
     pyproject.toml: allow
     transformation/guides/*.sh: ask
     transformation/guides/**/*.sh: ask
