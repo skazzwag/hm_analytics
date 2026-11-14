@@ -11,7 +11,7 @@ with final as (
         box_office,
         _dlt_load_id,
         _dlt_id
-    from {{ source('horror_movies', 'omdb_scores') }}
+    from {{ source('horror_movies', 'box_office_snapshots') }}
 )
 
 select * from final

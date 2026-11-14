@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: stg_violence_gore_summary
+    description: >
+      Staging model for the violence/gore summary produced by the Mistral
+      web-search pipeline. The summary text ends with exactly one severity
+      label (Mild, Moderate, High, Extreme) and one frequency label
+      (Isolated, Occasional, Frequent, Pervasive); label extraction from the
+      text is a downstream concern. Append-only; latest row per film is
+      selected by consumers via row_number() over (partition by tmdb_id
+      order by scraped_at desc). Citations are not included here; they live
+      in the violence_gore_summary__citations source child table.
+    columns:
+      - name: tmdb_id
+        data_type: integer
+        description: "TMDB movie ID (join key to movie_catalogue)"
+        data_tests:
+          - not_null
+      - name: title
+        data_type: varchar
+        description: "Movie title analysed"
+      - name: release_date
+        data_type: varchar
+        description: "Release date used to disambiguate the movie (YYYY-MM-DD)"
+      - name: summary
+        data_type: varchar
+        description: >
+          "Concise violence/gore summary text ending with one severity label
+          (Mild, Moderate, High, Extreme) and one frequency label (Isolated,
+          Occasional, Frequent, Pervasive)"
+      - name: model
+        data_type: varchar
+        description: "Mistral model used for the analysis"
+      - name: scraped_at
+        data_type: timestamp
+        description: "UTC timestamp of the pipeline run (snapshot key)"
+        data_tests:
+          - not_null
+      - name: _dlt_load_id
+        data_type: varchar
+        description: "DLT load identifier"
+      - name: _dlt_id
+        data_type: varchar
+        description: "DLT unique identifier"

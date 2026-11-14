@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: prs_violence_gore_summary
+    description: >
+      One row per analysed movie (tmdb_id) with the latest violence/gore
+      summary from the Mistral web-search pipeline and its web-search
+      citations. The pipeline is append-only; the latest run per film wins
+      (row_number() over (partition by tmdb_id order by scraped_at desc)).
+      Films not yet analysed are absent. Severity and frequency labels are
+      embedded at the end of the summary text; they are not separate
+      warehouse columns and are not re-extracted here.
+    columns:
+      - name: tmdb_id
+        data_type: integer
+        description: "TMDB movie ID (primary key; grain is one row per analysed movie)"
+        data_tests:
+          - not_null
+          - unique
+      - name: title
+        data_type: varchar
+        description: "Movie title analysed (not unique across films — never use as a key)"
+      - name: release_date
+        data_type: date
+        description: "Release date used to disambiguate the movie (NULL when the pipeline value is empty)"
+      - name: summary
+        data_type: varchar
+        description: >
+          "Concise violence/gore summary from the latest pipeline run, ending
+          with one severity label (Mild, Moderate, High, Extreme) and one
+          frequency label (Isolated, Occasional, Frequent, Pervasive)"
+      - name: summary_model
+        data_type: varchar
+        description: "Mistral model that produced the latest summary"
+      - name: scraped_at
+        data_type: timestamp
+        description: "UTC timestamp of the latest pipeline run that analysed this movie"
+      - name: citations
+        data_type: varchar
+        description: >
+          "Web-search citations of the latest run, aggregated as a
+          semicolon-separated list of 'title: url' pairs (NULL when the run
+          produced no citations). Display provenance only; citation order is
+          not guaranteed."

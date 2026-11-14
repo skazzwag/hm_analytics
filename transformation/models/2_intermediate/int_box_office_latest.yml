@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: int_box_office_latest
+    description: >
+      Deduplicated box-office state: the latest snapshot per film
+      (row_number() over (partition by imdb_id order by scraped_at desc) = 1,
+      explicit ordering — arg_max is avoided because DuckDB arg_max skips NULL
+      args and would mask value->'N/A' regressions). Grain: one row per
+      imdb_id. Raw dlt provenance columns (_dlt_load_id, _dlt_id) are not
+      carried past this layer; scraped_at is the provenance timestamp that
+      downstream models expose.
+    columns:
+      - name: imdb_id
+        data_type: varchar
+        description: "IMDb title ID (primary key of the deduplicated grain)"
+        data_tests:
+          - not_null
+          - unique
+      - name: tmdb_id
+        data_type: integer
+        description: "TMDB movie ID (foreign key to movie_catalogue)"
+        data_tests:
+          - not_null
+      - name: scraped_at
+        data_type: timestamp
+        description: "UTC timestamp of the latest snapshot (provenance for the final values)"
+        data_tests:
+          - not_null
+      - name: imdb_rating
+        data_type: varchar
+        description: "IMDb rating (0-10) or 'N/A' as of the latest snapshot"
+      - name: imdb_votes
+        data_type: varchar
+        description: "IMDb votes count or 'N/A' as of the latest snapshot"
+      - name: metascore
+        data_type: varchar
+        description: "Metacritic score (0-100) or 'N/A' as of the latest snapshot"
+      - name: rotten_tomatoes_score
+        data_type: varchar
+        description: "Rotten Tomatoes tomatometer or 'N/A' as of the latest snapshot"
+      - name: metacritic_score
+        data_type: varchar
+        description: "Metacritic score from the Ratings array or 'N/A' as of the latest snapshot"
+      - name: box_office
+        data_type: varchar
+        description: >
+          "US box office gross (e.g. '$47,000,000') or 'N/A' as of the latest
+          snapshot. A regression to 'N/A' is preserved, not backfilled from an
+          earlier snapshot."

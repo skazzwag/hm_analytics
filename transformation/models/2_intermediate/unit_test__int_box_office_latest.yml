@@ -1,0 +1,146 @@
+unit_tests:
+  - name: na_regression_latest_snapshot_wins
+    model: int_box_office_latest
+    description: >
+      Edge case (observed as the 'Dracula' regression): a later snapshot
+      regresses box_office (and other values) to 'N/A'. The latest snapshot
+      must win — no backfill from the earlier non-N/A value, which is the
+      documented DuckDB arg_max NULL-skipping trap.
+    given:
+      - input: ref('stg_box_office_snapshots')
+        rows:
+          - imdb_id: 'tt0000001'
+            tmdb_id: 101
+            scraped_at: '2026-04-08 12:00:00'
+            imdb_rating: '7.1'
+            imdb_votes: '1,000'
+            metascore: '55'
+            rotten_tomatoes_score: '60%'
+            metacritic_score: '55'
+            box_office: '$1,000,000'
+          - imdb_id: 'tt0000001'
+            tmdb_id: 101
+            scraped_at: '2026-05-30 12:00:00'
+            imdb_rating: 'N/A'
+            imdb_votes: 'N/A'
+            metascore: 'N/A'
+            rotten_tomatoes_score: 'N/A'
+            metacritic_score: 'N/A'
+            box_office: 'N/A'
+    expect:
+      rows:
+        - imdb_id: 'tt0000001'
+          tmdb_id: 101
+          scraped_at: '2026-05-30 12:00:00'
+          imdb_rating: 'N/A'
+          imdb_votes: 'N/A'
+          metascore: 'N/A'
+          rotten_tomatoes_score: 'N/A'
+          metacritic_score: 'N/A'
+          box_office: 'N/A'
+
+  - name: all_na_film_yields_single_row
+    model: int_box_office_latest
+    description: >
+      Edge case (402 observed all-N/A films): a film whose every snapshot is
+      'N/A' still produces exactly one deduplicated row with 'N/A' values,
+      not zero rows.
+    given:
+      - input: ref('stg_box_office_snapshots')
+        rows:
+          - imdb_id: 'tt0000002'
+            tmdb_id: 102
+            scraped_at: '2026-04-08 12:00:00'
+            imdb_rating: 'N/A'
+            imdb_votes: 'N/A'
+            metascore: 'N/A'
+            rotten_tomatoes_score: 'N/A'
+            metacritic_score: 'N/A'
+            box_office: 'N/A'
+          - imdb_id: 'tt0000002'
+            tmdb_id: 102
+            scraped_at: '2026-05-30 12:00:00'
+            imdb_rating: 'N/A'
+            imdb_votes: 'N/A'
+            metascore: 'N/A'
+            rotten_tomatoes_score: 'N/A'
+            metacritic_score: 'N/A'
+            box_office: 'N/A'
+    expect:
+      rows:
+        - imdb_id: 'tt0000002'
+          tmdb_id: 102
+          scraped_at: '2026-05-30 12:00:00'
+          imdb_rating: 'N/A'
+          imdb_votes: 'N/A'
+          metascore: 'N/A'
+          rotten_tomatoes_score: 'N/A'
+          metacritic_score: 'N/A'
+          box_office: 'N/A'
+
+  - name: single_snapshot_film_passes_through
+    model: int_box_office_latest
+    description: >
+      Edge case: a film with exactly one snapshot is returned unchanged.
+    given:
+      - input: ref('stg_box_office_snapshots')
+        rows:
+          - imdb_id: 'tt0000003'
+            tmdb_id: 103
+            scraped_at: '2026-04-08 12:00:00'
+            imdb_rating: '6.5'
+            imdb_votes: '500'
+            metascore: '48'
+            rotten_tomatoes_score: '52%'
+            metacritic_score: '48'
+            box_office: '$500,000'
+    expect:
+      rows:
+        - imdb_id: 'tt0000003'
+          tmdb_id: 103
+          scraped_at: '2026-04-08 12:00:00'
+          imdb_rating: '6.5'
+          imdb_votes: '500'
+          metascore: '48'
+          rotten_tomatoes_score: '52%'
+          metacritic_score: '48'
+          box_office: '$500,000'
+
+  - name: multi_snapshot_rows_ordered_by_scraped_at_not_input_order
+    model: int_box_office_latest
+    description: >
+      Edge case: fixture rows are listed newest-first to prove selection is
+      driven by the explicit `order by scraped_at desc`, not by physical row
+      order. The later snapshot's higher gross must win.
+    given:
+      - input: ref('stg_box_office_snapshots')
+        rows:
+          - imdb_id: 'tt0000004'
+            tmdb_id: 104
+            scraped_at: '2026-05-30 12:00:00'
+            imdb_rating: '7.0'
+            imdb_votes: '2,000'
+            metascore: '60'
+            rotten_tomatoes_score: '70%'
+            metacritic_score: '60'
+            box_office: '$9,000,000'
+          - imdb_id: 'tt0000004'
+            tmdb_id: 104
+            scraped_at: '2026-04-08 12:00:00'
+            imdb_rating: '7.0'
+            imdb_votes: '1,500'
+            metascore: '60'
+            rotten_tomatoes_score: '70%'
+            metacritic_score: '60'
+            box_office: '$5,000,000'
+    expect:
+      rows:
+        - imdb_id: 'tt0000004'
+          tmdb_id: 104
+          scraped_at: '2026-05-30 12:00:00'
+          imdb_rating: '7.0'
+          imdb_votes: '2,000'
+          metascore: '60'
+          rotten_tomatoes_score: '70%'
+          metacritic_score: '60'
+          box_office: '$9,000,000'
