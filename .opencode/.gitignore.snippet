@@ -1,0 +1,12 @@
+# Add these patterns to the EXISTING repository-root .gitignore (merge, do not replace it).
+# The complete personal analyst workspace stays untracked, including notebooks,
+# plans, data snapshots, exports and unreviewed Guide candidates.
+/analysis/
+
+# Generated engineering evidence and local runtime policy files; not source files.
+/.analysis/
+/agent-dbt.local.json
+/tools/altimate/node_modules/
+
+# Retain your existing dbt target/log and credentials ignores.
+# Git ignore is not a security boundary or backup for local notebooks.

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Transformation Quality"
+  short_description: "dbt Core contracts, tests and development verification"

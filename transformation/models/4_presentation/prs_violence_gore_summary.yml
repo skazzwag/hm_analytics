@@ -1,0 +1,95 @@
+version: 2
+
+models:
+  - name: prs_violence_gore_summary
+    description: >
+      One row per analysed movie (tmdb_id) with the latest violence/gore
+      summary from the Mistral web-search pipeline, its web-search
+      citations, and the Jev classification from
+      int_violence_classification (LEFT JOIN on tmdb_id). The pipeline is
+      append-only; the latest run per film wins (row_number() over
+      (partition by tmdb_id order by scraped_at desc)). Films not yet
+      analysed are absent. Classification columns are NULL when the film
+      has no classification yet, and on dev-local targets (where
+      int_violence_classification is disabled via use_ai_functions and the
+      join is not emitted) they are NULL for every row.
+    columns:
+      - name: tmdb_id
+        data_type: integer
+        description: "TMDB movie ID (primary key; grain is one row per analysed movie)"
+        data_tests:
+          - not_null
+          - unique
+      - name: title
+        data_type: varchar
+        description: "Movie title analysed (not unique across films — never use as a key)"
+      - name: release_date
+        data_type: date
+        description: "Release date used to disambiguate the movie (NULL when the pipeline value is empty)"
+      - name: summary
+        data_type: varchar
+        description: >
+          "Concise violence/gore summary text from the latest pipeline run
+          (classification is exposed via the dedicated severity/frequency
+          columns, not parsed from this text)"
+      - name: summary_model
+        data_type: varchar
+        description: "Mistral model that produced the latest summary"
+      - name: scraped_at
+        data_type: timestamp
+        description: "UTC timestamp of the latest pipeline run that analysed this movie"
+      - name: citations
+        data_type: varchar
+        description: >
+          "Web-search citations of the latest run, aggregated as a
+          semicolon-separated list of 'title: url' pairs (NULL when the run
+          produced no citations). Display provenance only; citation order is
+          not guaranteed."
+      - name: severity
+        data_type: varchar
+        description: >
+          "Jev-classified violence/gore severity label: Mild, Moderate, High
+          or Extreme (criterion nearest the rounded severity_score). NULL
+          when the film is unclassified or the classification model is
+          disabled (dev-local)."
+        data_tests:
+          - accepted_values:
+              values: ['Mild', 'Moderate', 'High', 'Extreme']
+              config:
+                enabled: "{{ var('use_ai_functions') }}"
+      - name: severity_score
+        data_type: double
+        description: >
+          "Weighted position on the ordered severity rubric, 0-3 (0 = Mild,
+          3 = Extreme); values between integers sit between criteria. NULL
+          when unclassified or classification is disabled."
+      - name: severity_confidence
+        data_type: double
+        description: >
+          "Calibrated model confidence (0-1) in the severity answer; low
+          values flag rows for review (no pre-build validation exists).
+          NULL when unclassified or classification is disabled."
+      - name: frequency
+        data_type: varchar
+        description: >
+          "Jev-classified violence/gore frequency label: Isolated,
+          Occasional, Frequent or Pervasive (criterion nearest the rounded
+          frequency_score). NULL when the film is unclassified or the
+          classification model is disabled (dev-local)."
+        data_tests:
+          - accepted_values:
+              values: ['Isolated', 'Occasional', 'Frequent', 'Pervasive']
+              config:
+                enabled: "{{ var('use_ai_functions') }}"
+      - name: frequency_score
+        data_type: double
+        description: >
+          "Weighted position on the ordered frequency rubric, 0-3 (0 =
+          Isolated, 3 = Pervasive); values between integers sit between
+          criteria. NULL when unclassified or classification is disabled."
+      - name: frequency_confidence
+        data_type: double
+        description: >
+          "Calibrated model confidence (0-1) in the frequency answer; low
+          values flag rows for review (no pre-build validation exists).
+          NULL when unclassified or classification is disabled."

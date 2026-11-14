@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "boundary_verified_by_user": false,
+  "dbt_executable": "/home/YOU/project/.venv/bin/dbt",
+  "database": "agent_dev_fido",
+  "attachments": [],
+  "timeout_seconds": 600
+}

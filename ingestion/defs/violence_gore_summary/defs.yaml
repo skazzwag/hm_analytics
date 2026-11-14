@@ -1,0 +1,10 @@
+type: ingestion.components.RefreshableDltLoadCollectionComponent
+
+attributes:
+  loads:
+    - source: .loads.violence_gore_summary_load_source
+      pipeline: .loads.violence_gore_summary_pipeline
+      translation:
+        group_name: "violence_gore_summary"
+        deps:
+          - "raw/movie_catalogue"

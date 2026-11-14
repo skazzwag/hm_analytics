@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: prs_box_office_final
+    description: >
+      One row per catalogue film: the final (latest-snapshot) US domestic
+      gross with snapshot provenance. Ingestion appends full-catalogue
+      snapshots with no completion logic, so "final" means the latest snapshot
+      per film (int_box_office_latest), not a verified terminal value.
+    # Analysis-stage finality guidance (do not hard-code a row filter here):
+    # the >=16-weeks-past-release plateau proxy is exposed as the documented
+    # boolean column `is_finished_cohort` (release_date at least 16 weeks
+    # before the final snapshot's scraped_at). Investigation evidence
+    # (analysis/omdb_plateau_findings.md, 2026-11-09): 100% of films >=16
+    # weeks past release showed a box-office plateau (k=2 identical
+    # consecutive values) — high confidence for back-catalogue, LOW for
+    # current releases (one in-run observation). Filter on
+    # `is_finished_cohort` for finished-cohort analysis and recalibrate the
+    # threshold as more snapshots accumulate.
+    columns:
+      - name: tmdb_id
+        data_type: integer
+        description: "TMDB movie ID (primary key; grain is one row per catalogue film)"
+        data_tests:
+          - not_null
+          - unique
+      - name: title
+        data_type: varchar
+        description: "Release title (not unique across films — never use as a key)"
+      - name: release_date
+        data_type: date
+        description: "Theatrical release date (NULL when the catalogue value is empty)"
+      - name: original_language
+        data_type: varchar
+        description: "ISO 639-1 language code"
+      - name: imdb_id
+        data_type: varchar
+        description: "IMDb title ID of the matched snapshot (NULL when no snapshot exists yet)"
+      - name: box_office_scraped_at
+        data_type: timestamp
+        description: "UTC timestamp of the latest snapshot — provenance for final_domestic_gross (NULL when no snapshot exists)"
+      - name: final_domestic_gross
+        data_type: decimal(12, 2)
+        description: >
+          "Latest-snapshot US domestic gross in USD, parsed from OMDb's
+          box_office string. NULL when the latest snapshot reports 'N/A' (a
+          value->'N/A' regression is preserved, not backfilled) or when no
+          snapshot exists."
+        data_tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: 'final_domestic_gross is null or final_domestic_gross >= 0'
+      - name: is_finished_cohort
+        data_type: boolean
+        description: >
+          "Documented finality proxy, NOT a row filter: TRUE when
+          release_date is at least 16 weeks before box_office_scraped_at
+          (plateau evidence supports treating the gross as final). NULL when
+          release_date or the snapshot is missing. The 16-week threshold is a
+          low-confidence proxy for current releases — recalibrate before
+          relying on it for in-run films."

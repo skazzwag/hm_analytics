@@ -1,0 +1,3 @@
+interface:
+  display_name: "MotherDuck Guides"
+  short_description: "Retrieve, draft, review and publish warehouse context safely."

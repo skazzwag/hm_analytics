@@ -1,0 +1,135 @@
+{
+  "delivery": "user-uploaded .agents.zip (Altimate, marimo) + .agents(1).zip (full Dagster), 2026-11-01",
+  "skills": [
+    {
+      "name": "dbt-creating-dbt-models",
+      "source": "altimate",
+      "upstream_skill_sha256": "601c707bdd0a56ec7814b34709521ea0ffcdb028003e4f825d83750a70c6a8f2",
+      "source_path_in_uploaded_archive": ".agents/skills/creating-dbt-models/",
+      "files": 2,
+      "adaptations": "name, role-policy banner",
+      "upstream_git_blob_sha1": "fc9919a6e1ad5ef3ff948866df6af31963930f22",
+      "upstream_commit": "d6a2faa14b32da613366856b44811138b8e26127",
+      "verification": "Exact Git blob SHA-1 matches pinned upstream GitHub tree, 2026-11-01; copied content adapted for project safety"
+    },
+    {
+      "name": "dbt-debugging-dbt-errors",
+      "source": "altimate",
+      "upstream_skill_sha256": "3a32473f71da87849f8b9ad71be43bdb55bd45bcc640a4a7e74095a2ee1ad5d2",
+      "source_path_in_uploaded_archive": ".agents/skills/debugging-dbt-errors/",
+      "files": 2,
+      "adaptations": "name, role-policy banner",
+      "upstream_git_blob_sha1": "f2eded355e6245748dc41c9cbc01dd4a68162c39",
+      "upstream_commit": "d6a2faa14b32da613366856b44811138b8e26127",
+      "verification": "Exact Git blob SHA-1 matches pinned upstream GitHub tree, 2026-11-01; copied content adapted for project safety"
+    },
+    {
+      "name": "dbt-testing-dbt-models",
+      "source": "altimate",
+      "upstream_skill_sha256": "ed76fbbbc3170753386a0ce3bfaaba3e89bc303098c05373646519e704a6e2b4",
+      "source_path_in_uploaded_archive": ".agents/skills/testing-dbt-models/",
+      "files": 2,
+      "adaptations": "name, role-policy banner",
+      "upstream_git_blob_sha1": "a9d615548a9f72b13cba9dc2d7ea5f01701f18ea",
+      "upstream_commit": "d6a2faa14b32da613366856b44811138b8e26127",
+      "verification": "Exact Git blob SHA-1 matches pinned upstream GitHub tree, 2026-11-01; copied content adapted for project safety"
+    },
+    {
+      "name": "dbt-documenting-dbt-models",
+      "source": "altimate",
+      "upstream_skill_sha256": "128a222b1c0329bb75eca720b8c3648172bac61bea4bfa3f3c3d9a80579f031c",
+      "source_path_in_uploaded_archive": ".agents/skills/documenting-dbt-models/",
+      "files": 2,
+      "adaptations": "name, role-policy banner",
+      "upstream_git_blob_sha1": "795c83a03f6ab1e2cd301a668dfcccbb1c8f7af5",
+      "upstream_commit": "d6a2faa14b32da613366856b44811138b8e26127",
+      "verification": "Exact Git blob SHA-1 matches pinned upstream GitHub tree, 2026-11-01; copied content adapted for project safety"
+    },
+    {
+      "name": "dbt-migrating-sql-to-dbt",
+      "source": "altimate",
+      "upstream_skill_sha256": "38c6cae440d34dba6653a5a9069db1114204080f8134179065b75c045624b8b7",
+      "source_path_in_uploaded_archive": ".agents/skills/migrating-sql-to-dbt/",
+      "files": 2,
+      "adaptations": "name, role-policy banner",
+      "upstream_git_blob_sha1": "c1a0632722a84c0c5336245ccb09ffad9d96a0cc",
+      "upstream_commit": "d6a2faa14b32da613366856b44811138b8e26127",
+      "verification": "Exact Git blob SHA-1 matches pinned upstream GitHub tree, 2026-11-01; copied content adapted for project safety"
+    },
+    {
+      "name": "dbt-refactoring-dbt-models",
+      "source": "altimate",
+      "upstream_skill_sha256": "738c129ceb4936500cc3e09ad2347acf9d16ddab9773fc99aa018079d3708fbd",
+      "source_path_in_uploaded_archive": ".agents/skills/refactoring-dbt-models/",
+      "files": 2,
+      "adaptations": "name, role-policy banner",
+      "upstream_git_blob_sha1": "fd791bd36e0347d3090189bed701e557756e6607",
+      "upstream_commit": "d6a2faa14b32da613366856b44811138b8e26127",
+      "verification": "Exact Git blob SHA-1 matches pinned upstream GitHub tree, 2026-11-01; copied content adapted for project safety"
+    },
+    {
+      "name": "dbt-developing-incremental-models",
+      "source": "altimate",
+      "upstream_skill_sha256": "0d4c3168f2249e22f6938f5801087229cd4285d1caedf57795747c3195a4ccbc",
+      "source_path_in_uploaded_archive": ".agents/skills/developing-incremental-models/",
+      "files": 2,
+      "adaptations": "name, role-policy banner",
+      "upstream_git_blob_sha1": "6aa98770d67b0bf0ea1151a807ed249eead0e08f",
+      "upstream_commit": "d6a2faa14b32da613366856b44811138b8e26127",
+      "verification": "Exact Git blob SHA-1 matches pinned upstream GitHub tree, 2026-11-01; copied content adapted for project safety"
+    },
+    {
+      "name": "marimo-pair",
+      "source": "marimo",
+      "upstream_skill_sha256": "25dcf596397f5cf5c8f91dc53fd403c81be640b3fec02faa4cc26570e9ccc26c",
+      "source_path_in_uploaded_archive": ".agents/skills/marimo-pair/",
+      "files": 9,
+      "adaptations": "name, role-policy banner, marimo authenticated localhost-only helper and docs",
+      "upstream_git_blob_sha1": "15d5b0887844d324ab766b181f3b821c85e3353e",
+      "upstream_commit": "2f1d7fffa50607dc9d8660cb931f4470707f8697",
+      "verification": "Exact Git blob SHA-1 matches pinned upstream GitHub tree, 2026-11-01; copied content adapted for project safety"
+    },
+    {
+      "name": "dagster-expert",
+      "source": "dagster",
+      "upstream_skill_sha256": "63c489ee9c0f584f5fe0486f0be58cd3a13e94f8d2801bb6de231690c6539d00",
+      "source_path_in_uploaded_archive": ".agents(1).zip:.agents/skills/dagster-expert/",
+      "files": 175,
+      "source_documents": 174,
+      "adaptations": "OpenCode name / primary-tool and CLI-only safety policy banners; central Dagster API and launch reference overrides; Windows Zone.Identifier sidecars omitted; corrected one broken upstream link in references/components/creating-components.md",
+      "upstream_git_blob_sha1": "6951cb37396d42a4cab7de2466447738deae32d1",
+      "upstream_commit": "c23c97fe5ffc4a39dc9cc1f9834c0311858cc16f",
+      "verification": "Uploaded SKILL.md Git blob SHA-1 matches pinned Dagster upstream tree; all 173 supporting references are from uploaded ZIP, non-executable UTF-8 files; original reference hashes not individually checked against upstream",
+      "source_file_manifest": "vendor/official-skills/dagster-source-manifest.json"
+    }
+  ],
+  "excluded": [
+    "dbt-model-enhancement (not present; user security flag)"
+  ],
+  "upstream_reference_commits": {
+    "altimate": {
+      "repo": "https://github.com/AltimateAI/data-engineering-skills.git",
+      "sha": "d6a2faa14b32da613366856b44811138b8e26127",
+      "license": "MIT",
+      "purpose": "seven standalone dbt skills, excluding delegation and Snowflake"
+    },
+    "marimo": {
+      "repo": "https://github.com/marimo-team/marimo-pair.git",
+      "sha": "2f1d7fffa50607dc9d8660cb931f4470707f8697",
+      "license": "Apache-2.0",
+      "purpose": "marimo-pair plus bundled live execution scripts and reference files"
+    },
+    "dagster": {
+      "repo": "https://github.com/dagster-io/skills.git",
+      "sha": "c23c97fe5ffc4a39dc9cc1f9834c0311858cc16f",
+      "license": "Apache-2.0",
+      "purpose": "dagster plugin's full dagster-expert (not deprecated stub)"
+    }
+  },
+  "source_verification": {
+    "result": "all 15 source files match pinned upstream tree blobs",
+    "altimate_commit": "d6a2faa14b32da613366856b44811138b8e26127",
+    "marimo_commit": "2f1d7fffa50607dc9d8660cb931f4470707f8697",
+    "dagster": "Full uploaded skill: upstream entrypoint blob verified at c23c97f; 173 reference files read and included; per-reference hashes not independently checked against upstream"
+  }
+}

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Fido Dagster"
+  short_description: "Project data-platform workflow and boundaries"

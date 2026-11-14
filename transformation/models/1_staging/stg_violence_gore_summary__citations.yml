@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: stg_violence_gore_summary__citations
+    description: >
+      Staging model for the dlt child table of violence_gore_summary holding
+      web-search citation provenance (tool_reference chunks) for each
+      analysis row. Join to the parent staging row via _dlt_parent_id =
+      _dlt_id; empty when a run produced no citations.
+    columns:
+      - name: title
+        data_type: varchar
+        description: "Citation source title (may be absent for a tool_reference chunk)"
+      - name: url
+        data_type: varchar
+        description: "Citation source URL"
+        data_tests:
+          - not_null
+      - name: _dlt_parent_id
+        data_type: varchar
+        description: "dlt foreign key to the parent row's _dlt_id"
+        data_tests:
+          - not_null
+      - name: _dlt_load_id
+        data_type: varchar
+        description: "DLT load identifier"
+      - name: _dlt_id
+        data_type: varchar
+        description: "DLT unique identifier"

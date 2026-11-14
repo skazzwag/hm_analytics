@@ -1,0 +1,8 @@
+type: ingestion.components.RefreshableDltLoadCollectionComponent
+
+attributes:
+  loads:
+    - source: .loads.tmdb_catalogue_load_source
+      pipeline: .loads.tmdb_catalogue_pipeline
+      translation:
+        group_name: "tmdb_catalogue"

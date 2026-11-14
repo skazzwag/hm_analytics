@@ -1,0 +1,27 @@
+version: 2
+
+macros:
+  - name: initcap
+    description: Title-case each whitespace-separated word.
+    arguments:
+      - name: field_name
+        type: string
+        description: Column to title-case
+
+  - name: drop_schema
+    description: Drop a schema in the selected database.
+    arguments:
+      - name: schema_name
+        type: string
+        description: Schema to drop
+      - name: database_name
+        type: string
+        description: Database containing the schema (defaults to target.database)
+
+  - name: generate_schema_name
+    description: >
+      Prod uses custom schemas as-is. Other environments ignore custom schemas
+      except 6_access models, which keep their configured schema.
+
+  - name: generate_database_name
+    description: Use a custom database when configured, otherwise the target database.

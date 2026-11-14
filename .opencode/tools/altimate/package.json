@@ -1,0 +1,13 @@
+{
+  "name": "local-altimate-analysis-helper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "description": "User-maintained CLI adapter for Altimate's native analysis functions; not an official Altimate integration.",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "smoke": "node analyze.mjs self-test"
+  },
+  "dependencies": { "@altimateai/altimate-core": "0.7.0" }
+}

@@ -1,0 +1,20 @@
+{
+  "altimate": {
+    "repo": "https://github.com/AltimateAI/data-engineering-skills.git",
+    "sha": "d6a2faa14b32da613366856b44811138b8e26127",
+    "license": "MIT",
+    "purpose": "seven standalone dbt skills, excluding delegation and Snowflake"
+  },
+  "marimo": {
+    "repo": "https://github.com/marimo-team/marimo-pair.git",
+    "sha": "2f1d7fffa50607dc9d8660cb931f4470707f8697",
+    "license": "Apache-2.0",
+    "purpose": "marimo-pair plus bundled live execution scripts and reference files"
+  },
+  "dagster": {
+    "repo": "https://github.com/dagster-io/skills.git",
+    "sha": "c23c97fe5ffc4a39dc9cc1f9834c0311858cc16f",
+    "license": "Apache-2.0",
+    "purpose": "dagster plugin's full dagster-expert (not deprecated stub)"
+  }
+}

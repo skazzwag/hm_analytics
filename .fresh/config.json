@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "lsp_enabled": true,
+  "lsp": {
+    "python": [
+      {
+        "name": "ruff",
+        "command": "ruff",
+        "args": ["server"],
+        "enabled": true,
+        "root_markers": [
+          "pyproject.toml",
+          "ruff.toml",
+          ".ruff.toml",
+          ".git"
+        ],
+        "only_features": [
+          "diagnostics",
+          "code_action",
+          "format"
+        ]
+      },
+      {
+        "name": "ty",
+        "command": "ty",
+        "args": ["server"],
+        "enabled": true,
+        "root_markers": [
+          "pyproject.toml",
+          "ty.toml",
+          ".git"
+        ],
+        "except_features": [
+          "format"
+        ]
+      }
+    ],
+    "sql": {
+      "name": "dbt",
+      "command": "dbt-language-server",
+      "args": [],
+      "enabled": true,
+      "root_markers": [
+        "dbt_project.yml"
+      ],
+      "only_features": [
+        "completion",
+        "hover",
+        "definition",
+        "references"
+      ]
+    },
+    "yaml": {
+      "name": "dbt",
+      "command": "dbt-language-server",
+      "args": [],
+      "enabled": true,
+      "root_markers": [
+        "dbt_project.yml"
+      ],
+      "only_features": [
+        "completion",
+        "hover",
+        "definition",
+        "references"
+      ]
+    }
+  },
+  "languages": {
+    "python": {
+      "format_on_save": true
+    },
+    "sql": {
+      "format_on_save": false,
+      "tab_size": 4
+    },
+    "yaml": {
+      "tab_size": 2
+    }
+  }
+}

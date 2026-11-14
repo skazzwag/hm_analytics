@@ -1,0 +1,184 @@
+version: 2
+
+sources:
+  - name: horror_movies
+    description: >
+      Raw horror-movie data loaded by dlt into the `raw` schema of the
+      `horror_movies` database. Populated by the purpose-based ingestion
+      pipelines: tmdb_catalogue (static catalogue), box_office (append
+      snapshots from OMDb), and violence_gore_summary (Mistral web-search
+      analysis).
+    database: horror_movies
+    schema: raw
+    tables:
+      - name: movie_catalogue
+        description: >
+          One row per horror movie. Static fields from the TMDB discover
+          endpoint; merged (upsert) on each run.
+        columns:
+          - name: id
+            data_type: integer
+            description: TMDB movie ID (primary key)
+          - name: title
+            data_type: varchar
+            description: Release title
+          - name: original_title
+            data_type: varchar
+            description: Title in original language
+          - name: original_language
+            data_type: varchar
+            description: ISO 639-1 language code
+          - name: overview
+            data_type: varchar
+            description: Plot summary
+          - name: release_date
+            data_type: varchar
+            description: Theatrical release date (YYYY-MM-DD)
+          - name: adult
+            data_type: boolean
+            description: Adult content flag
+          - name: video
+            data_type: boolean
+            description: Video release flag
+          - name: poster_path
+            data_type: varchar
+            description: Relative path to poster image
+          - name: backdrop_path
+            data_type: varchar
+            description: Relative path to backdrop image
+          - name: genre_ids
+            data_type: varchar
+            description: TMDB genre ID list
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier
+
+      - name: box_office_snapshots
+        description: >
+          One row per film per pipeline run. Full-catalogue snapshot of
+          ratings and US box office from OMDb; append-only time series with
+          no completion logic in ingestion. The final value per film is
+          derived downstream as the latest snapshot by scraped_at (see
+          int_box_office_latest and prs_box_office_final).
+        columns:
+          - name: imdb_id
+            data_type: varchar
+            description: IMDb title ID (composite primary key)
+            data_tests:
+              - not_null
+          - name: scraped_at
+            data_type: timestamp
+            description: UTC timestamp of the pipeline run (composite primary key)
+            data_tests:
+              - not_null
+          - name: tmdb_id
+            data_type: integer
+            description: TMDB movie ID (foreign key to movie_catalogue)
+            data_tests:
+              - not_null
+          - name: imdb_rating
+            data_type: varchar
+            description: IMDb weighted average rating (0-10)
+          - name: imdb_votes
+            data_type: varchar
+            description: Number of IMDb user votes
+          - name: metascore
+            data_type: varchar
+            description: Metacritic score (0-100)
+          - name: rotten_tomatoes_score
+            data_type: varchar
+            description: Rotten Tomatoes tomatometer (e.g. "72%")
+          - name: metacritic_score
+            data_type: varchar
+            description: Metacritic score from the Ratings array
+          - name: box_office
+            data_type: varchar
+            description: >
+              US box office gross (e.g. "$47,000,000") or "N/A" when OMDb
+              reports no figure. Later snapshots may regress a previously
+              reported value to "N/A"; the latest snapshot is authoritative.
+            data_tests:
+              - dbt_utils.expression_is_true:
+                  arguments:
+                    expression: 'regexp_matches(box_office, ''^\$[0-9,]+$|^N/A$'') or box_office is null'
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier
+
+      - name: violence_gore_summary
+        description: >
+          One row per analysed movie per run. Concise, label-free
+          violence/gore summary produced by the Mistral web-search pipeline;
+          append-only. Historical rows may have severity/frequency labels
+          embedded in the text (legacy prompt); the current prompt strips
+          them. Classification (severity/frequency, 0-3 score scale with
+          calibrated confidence) is provided by int_violence_classification
+          (Jev prompt_jev), not by text extraction. tmdb_id joins to
+          movie_catalogue. Citations live in the
+          violence_gore_summary__citations child table.
+        columns:
+          - name: tmdb_id
+            data_type: integer
+            description: TMDB movie ID (foreign key to movie_catalogue)
+            data_tests:
+              - not_null
+          - name: title
+            data_type: varchar
+            description: Movie title analysed
+          - name: release_date
+            data_type: varchar
+            description: Release date used to disambiguate the movie (YYYY-MM-DD)
+          - name: summary
+            data_type: varchar
+            description: >
+              Concise, label-free violence/gore summary text. Historical rows
+              may end with one severity label (Mild, Moderate, High, Extreme)
+              and one frequency label (Isolated, Occasional, Frequent,
+              Pervasive) from the legacy prompt; the current prompt strips
+              these labels. Classification comes from
+              int_violence_classification, not text extraction.
+          - name: model
+            data_type: varchar
+            description: Mistral model used for the analysis
+          - name: scraped_at
+            data_type: timestamp
+            description: UTC timestamp of the pipeline run (snapshot key)
+            data_tests:
+              - not_null
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier
+
+      - name: violence_gore_summary__citations
+        description: >
+          dlt child table of violence_gore_summary holding web-search
+          citation provenance (tool_reference chunks) for each analysis row.
+          Join to the parent via _dlt_parent_id = parent _dlt_id; empty when
+          a run produced no citations.
+        columns:
+          - name: title
+            data_type: varchar
+            description: Citation source title
+          - name: url
+            data_type: varchar
+            description: Citation source URL
+            data_tests:
+              - not_null
+          - name: _dlt_parent_id
+            data_type: varchar
+            description: dlt foreign key to the parent row's _dlt_id
+          - name: _dlt_load_id
+            data_type: varchar
+            description: dlt load pipeline identifier
+          - name: _dlt_id
+            data_type: varchar
+            description: dlt unique row identifier

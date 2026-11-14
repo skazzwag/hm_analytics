@@ -1,0 +1,10 @@
+type: ingestion.components.RefreshableDltLoadCollectionComponent
+
+attributes:
+  loads:
+    - source: .loads.box_office_load_source
+      pipeline: .loads.box_office_pipeline
+      translation:
+        group_name: "box_office"
+        deps:
+          - "raw/movie_catalogue"
