@@ -28,6 +28,13 @@ permission:
     node .opencode/tools/altimate/prepare-dbt.mjs*: ask
     node .opencode/tools/altimate/freshness.mjs*: ask
     altimate-code check*: allow
+    ls*: allow
+    head*: allow
+    tail*: allow
+    wc*: allow
+    grep*: allow
+    sort*: allow
+    uniq*: allow
   task: deny
   skill:
     '*': deny
