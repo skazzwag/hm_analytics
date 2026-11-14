@@ -3,9 +3,10 @@ dlt source for concise violence/gore summaries via the Mistral Conversations API
 
 For every movie in ``movie_catalogue``, starts a Mistral conversation with
 the server-side ``web_search`` tool enabled and asks for a concise violence
-and gore summary using fixed severity and frequency labels. The final
-assistant message is stored together with tool-reference citations as
-provenance.
+and gore summary based on web research. The final assistant message is
+stored together with tool-reference citations as provenance. Severity and
+frequency classification is deliberately left to downstream warehouse
+modeling; the prompt requests only descriptive summary text.
 
 ``web_search`` is only available on the Conversations/Agents API
 (``/v1/conversations``), not in chat completions. Each run re-analyses the
@@ -46,35 +47,15 @@ INSTRUCTIONS = (
 )
 
 SUMMARY_PROMPT_TEMPLATE = """\
-Web search the movie '{title}' released on {release_date} to determine the \
-severity and frequency of its violence and gore content based on information \
-available through reviews, articles and comments of the movie. Match the film \
-title and date in case there is more than one movie with the same title. If \
-you cannot find any pertinent information on the movie then state that you \
-are unable to find it.
+Web search the movie '{title}' released on {release_date} to summarize its \
+violence and gore content based on information available through reviews, \
+articles and comments of the movie. Match the film title and date in case \
+there is more than one movie with the same title. If you cannot find any \
+pertinent information on the movie then state that you are unable to find it.
 
-Answer with a concise violence/gore summary (a few sentences) that ends with \
-exactly one severity label and one frequency label chosen from the tables \
-below. For example in this system, Terrifier would be extreme and pervasive, \
-the Shining high and occasional, and Lake Mungo mild and isolated.
-
-Severity labels:
-
-| Severity Label | Keywords/Descriptors |
-| --- | --- |
-| Mild | Minor injuries, implied violence, no blood |
-| Moderate | Blood, injuries, some gore |
-| High | Graphic injuries, mutilation, psychological |
-| Extreme | Dismemberment, torture, cannibalism, rituals |
-
-Frequency labels:
-
-| Frequency Label | Definition |
-| --- | --- |
-| Isolated | 1-2 brief or minor instances of violence/gore. |
-| Occasional | 3-5 scenes, or violence/gore is present but not central to the plot. |
-| Frequent | 6+ scenes, or violence/gore is a recurring element. |
-| Pervasive | Violence/gore is constant, central to the plot, or described as overwhelming. |
+Answer with a concise violence/gore summary (a few sentences) describing \
+what violence and gore appears in the movie and how prominent it is. Do not \
+assign rating labels or scores; describe the content factually in prose.
 """
 
 
