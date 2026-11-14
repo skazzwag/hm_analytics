@@ -6,6 +6,9 @@
 - **Implementation owner (when approved):** data-engineer (ingestion, Dagster); analytics-engineer (dbt/Guide impact)
 - **Supersedes:** ADR 0001 (static/temporal cadence split). Also supersedes v1 of the
   underlying plan (completion-aware ingestion skipping, removed by user decision 2026-11-14).
+- **Amendment (2026-11-14):** severity/frequency classification moved to warehouse-native
+  `prompt_jev` — see ADR 0003 (the "severity/frequency labels retained" aspect of this ADR's
+  violence pipeline is superseded).
 - **Plan:** `~/.opencode/plan/2026-11-09-box-office-restructure.md` (v2, revised 2026-11-14)
 
 ## Context
