@@ -2,7 +2,7 @@
 
 Analytics project studying the effect of violence and gore on horror movie reception.
 
-Data is ingested from [TMDB](https://www.themoviedb.org/) and [OMDb](https://www.omdbapi.com/) into a DuckDB/MotherDuck database using [dlt](https://dlthub.com/). Classifications on the level of violence and gore in the horror movies are determined through sending a prompt to the Anthropic API to search for reviews and info about the movie, which is also handled as a custom dlt pipeline.
+Data is ingested from [TMDB](https://www.themoviedb.org/) and [OMDb](https://www.omdbapi.com/) into a DuckDB/MotherDuck database using [dlt](https://dlthub.com/). Classifications on the level of violence and gore in the horror movies are determined through the Mistral Conversations API with server-side web search, which is also handled as a custom dlt pipeline.
 
 ## Project Structure
 
@@ -13,9 +13,9 @@ hm_analytics/
 │   ├── defs/                      # Dagster components (dlt loads, dbt, jobs)
 │   ├── sources/                   # dlt source implementations
 │   │   └── api/
-│   │       ├── tmdb/              # TMDB source
-│   │       ├── omdb/              # OMDb sources
-│   │       └── movie_analysis/    # Anthropic LLM analysis source
+│   │       ├── tmdb/              # TMDB catalogue source
+│   │       ├── omdb/              # OMDb box-office snapshot source
+│   │       └── violence_gore_summary/ # Mistral web-search summary source
 │   ├── dockerfiles/               # user-code and webserver images
 │   └── run_pipeline.py            # CLI runner (manual runs without Dagster)
 ├── transformation/                # dbt Core transformations (DuckDB / MotherDuck)
@@ -49,7 +49,7 @@ Copy `.env.example` to `.env` and fill in the values:
 # For ingestion pipelines
 SOURCES__TMDB__API_KEY=...
 SOURCES__OMDB__API_KEY=...
-SOURCES__ANTHROPIC__API_KEY=...
+SOURCES__MISTRAL__API_KEY=...
 DESTINATION__MOTHERDUCK__CREDENTIALS="md:///horror_movies?motherduck_token=..."
 
 # For dbt pipelines
@@ -59,7 +59,8 @@ MOTHERDUCK_PROD_TOKEN=...
 For the MotherDuck remote MCP with Opencode run `opencode mcp auth motherduck` to authenticate.
 
 Get a free TMDB API key at [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api).  
-Get a free OMDb API key at [omdbapi.com/apikey](https://www.omdbapi.com/apikey.aspx).
+Get a free OMDb API key at [omdbapi.com/apikey](https://www.omdbapi.com/apikey.aspx).  
+Get a Mistral API key at [console.mistral.ai](https://console.mistral.ai/).
 
 This repo has been set up with `direnv` such that entering the root directory of this repo will effectively run `source .env`. For this to work, 
 ensure that you have `direnv` installed, the `eval "$(direnv hook bash)"` added to your `.bashrc` or equivalent, and `direnv allow` has been run in the repo root.
@@ -69,8 +70,9 @@ ensure that you have `direnv` installed, the `eval "$(direnv hook bash)"` added 
 Without Dagster (manual runs):
 
 ```bash
-uv run ingestion/run_pipeline.py             # temporal (default)
-uv run ingestion/run_pipeline.py --static    # static refresh
+uv run ingestion/run_pipeline.py             # all three pipelines
+uv run ingestion/run_pipeline.py --tmdb      # catalogue only
+uv run ingestion/run_pipeline.py --box-office --violence-gore
 ```
 
 With Dagster:
@@ -102,42 +104,46 @@ uv run dbt build --project-dir transformation --profiles-dir transformation --ta
 
 ## Pipeline Design
 
-The ingestion is split into **static** and **temporal** pipelines to avoid re-fetching unchanged data on every run.
+The ingestion is organized into **purpose-based pipelines** (ADR 0002) rather
+than a static/temporal cadence split:
 
-| Cadence | Mode | dlt pipeline | Tables written |
+| Purpose | dlt pipeline | Tables written | Write disposition |
 |---|---|---|---|
-| Weekly | `--static` | `tmdb_static` | `movie_catalogue`, `movie_details`, `movie_keywords` |
-| Weekly | `--static` | `omdb_static` | `omdb_metadata` |
-| Daily | _(default)_ | `tmdb_temporal` | `movie_popularity` |
-| Daily | _(default)_ | `omdb_temporal` | `omdb_scores` |
+| Catalogue (join spine) | `tmdb_catalogue` | `movie_catalogue` | merge |
+| Box-office snapshots | `box_office` | `box_office_snapshots` | append |
+| Content analysis | `violence_gore_summary` | `violence_gore_summary` (+ `violence_gore_summary__citations`) | append |
 
-The Anthropic violence/gore analysis (`violence_gore_analysis` pipeline) runs
-with the temporal mode and writes `violence_gore_analysis`.
+The `box_office` pipeline appends a full-catalogue OMDb snapshot on every run
+(no completion or cursor logic); "final box office" is the latest snapshot per
+film, derived downstream in dbt. The `violence_gore_summary` pipeline sends
+one Mistral Conversations API request (with the `web_search` tool) per movie.
 
 > **Run order on a fresh warehouse:** `movie_catalogue` is written only by the
-> `tmdb_static` pipeline. The `omdb_temporal` and analysis pipelines read it at
-> runtime, so run the static load first (in Dagster, `raw/omdb_scores` and
-> `raw/violence_gore_analysis` declare a dependency on `raw/movie_catalogue`,
-> which enforces this ordering).
+> `tmdb_catalogue` pipeline. The `box_office` and `violence_gore_summary`
+> pipelines read it at runtime, so run the catalogue load first (in Dagster,
+> `raw/box_office_snapshots` and `raw/violence_gore_summary` declare a
+> dependency on `raw/movie_catalogue`, which enforces this ordering).
 
 ### Request cost per run
 
 | Step | Requests | Notes |
 |---|---|---|
-| TMDB static (25 pages, 500 movies) | ~1,025 | 25 discover + 500 details + 500 keywords |
-| TMDB temporal (25 pages) | 25 | Discover endpoint only |
-| OMDb static (500 movies) | 500 | One request per movie |
-| OMDb temporal (batch of 800) | 800 | Cursor advances each day; resets after full cycle |
+| TMDB catalogue (25 pages, 500 movies) | 25 | Discover endpoint only |
+| OMDb box office (~1,061 movies) | ~1,061 | One request per movie — roughly one day's 1,000/day free tier quota |
+| Mistral violence/gore summary | ~1,061 | One conversation per movie; web search billed per use |
 
-The TMDB static pipeline paginates discover once and shares the resulting movie IDs across all three resources — eliminating the 3× duplication that would occur if each resource paginated independently.
-
-The OMDb temporal pipeline uses a persistent dlt state cursor to process movies in batches across consecutive days, keeping each run within the 1,000 requests/day free tier.
+The TMDB catalogue pipeline paginates the discover endpoint once and merges
+the results into `movie_catalogue`. The OMDb box-office pipeline fetches the
+full catalogue on every run, so it is triggered manually to stay within the
+1,000 requests/day free tier.
 
 ---
 
 ## Data Tables
 
-All tables sit in the `raw` schema. Static tables use merge disposition (upsert); temporal tables use append (one row per movie per run), enabling time-series analysis.
+All tables sit in the `raw` schema. The catalogue uses merge disposition
+(upsert); the snapshot and analysis tables use append (one row per movie per
+run), enabling time-series analysis.
 
 ### Source: TMDB
 
@@ -161,81 +167,17 @@ One row per horror movie. Static fields from the discover endpoint.
 | `backdrop_path` | string | Relative path to backdrop image |
 | `genre_ids` | list | TMDB genre ID list |
 
-#### `raw.movie_details`
-
-One row per horror movie. Full metadata from `/movie/{id}`, static fields only.
-
-| Column | Type | Description |
-|---|---|---|
-| `id` | integer | TMDB movie ID (primary key) |
-| `title` | string | Release title |
-| `original_title` | string | Title in original language |
-| `tagline` | string | Marketing tagline |
-| `overview` | string | Plot summary |
-| `release_date` | date | Theatrical release date |
-| `status` | string | Release status (e.g. Released, Post Production) |
-| `runtime` | integer | Runtime in minutes |
-| `budget` | integer | Production budget (USD) |
-| `revenue` | integer | Box office revenue (USD) |
-| `genre_names` | string | Comma-separated genre names |
-| `us_certification` | string | MPAA rating for US release (e.g. R, PG-13) |
-| `homepage` | string | Official website URL |
-| `imdb_id` | string | IMDb title ID (tt-prefixed) |
-| `original_language` | string | ISO 639-1 language code |
-| `adult` | boolean | Adult content flag |
-
-#### `raw.movie_keywords`
-
-Normalised keyword associations, one row per (movie, keyword) pair.
-
-| Column | Type | Description |
-|---|---|---|
-| `movie_id` | integer | TMDB movie ID (composite primary key) |
-| `keyword_id` | integer | TMDB keyword ID (composite primary key) |
-| `keyword_name` | string | Keyword text (lowercased) |
-
-#### `raw.movie_popularity`
-
-One row per movie per pipeline run. Popularity and vote metrics from the discover endpoint.
-
-| Column | Type | Description |
-|---|---|---|
-| `id` | integer | TMDB movie ID (composite primary key) |
-| `scraped_at` | timestamp | UTC timestamp of the pipeline run (composite primary key) |
-| `popularity` | float | TMDB popularity score |
-| `vote_average` | float | Mean user rating (0–10) |
-| `vote_count` | integer | Number of user ratings |
-
 ---
 
 ### Source: OMDb
 
 API: `http://www.omdbapi.com/` · Lookup: by title + release year · Rate limit: 1,000 req/day (free tier)
 
-Movies not found on OMDb are silently skipped. The free tier is shared across both static and temporal pipelines — plan runs accordingly.
+Movies not found on OMDb are silently skipped. A full-catalogue run consumes roughly the entire daily free-tier quota — plan runs accordingly.
 
-#### `raw.omdb_metadata`
+#### `raw.box_office_snapshots`
 
-One row per matched movie. Cast, crew, and descriptive metadata.
-
-| Column | Type | Description |
-|---|---|---|
-| `imdb_id` | string | IMDb title ID (primary key) |
-| `tmdb_id` | integer | TMDB movie ID (foreign key to `movie_catalogue`) |
-| `title` | string | Title as listed on OMDb |
-| `year` | string | Release year |
-| `rated` | string | MPAA content rating (e.g. R, PG-13, NR) |
-| `runtime` | string | Runtime (e.g. "109 min") |
-| `director` | string | Director name(s) |
-| `writer` | string | Writer name(s) |
-| `actors` | string | Top-billed cast |
-| `plot` | string | Short plot summary |
-| `awards` | string | Awards and nominations summary |
-| `dvd` | string | DVD release date |
-
-#### `raw.omdb_scores`
-
-One row per matched movie per pipeline run. Aggregated review scores.
+One row per matched movie per pipeline run. Aggregated review scores and box-office values, appended as timestamped snapshots.
 
 | Column | Type | Description |
 |---|---|---|
@@ -251,6 +193,35 @@ One row per matched movie per pipeline run. Aggregated review scores.
 
 ---
 
+### Source: Mistral
+
+API: `https://api.mistral.ai/v1` · Conversations API with the `web_search` tool · One conversation per movie
+
+#### `raw.violence_gore_summary`
+
+One row per movie per pipeline run. Concise violence/gore summary generated via web search.
+
+| Column | Type | Description |
+|---|---|---|
+| `title` | string | Movie title used in the prompt |
+| `release_date` | string | Theatrical release date |
+| `tmdb_id` | integer | TMDB movie ID (foreign key to `movie_catalogue`) |
+| `model` | string | Mistral model used |
+| `summary` | string | Concise violence/gore summary ending in severity and frequency labels |
+| `citations` | list | Web-search citations (also exploded into the child table) |
+| `scraped_at` | timestamp | UTC timestamp of the pipeline run |
+
+#### `raw.violence_gore_summary__citations`
+
+Child table with the web-search citations backing each summary row.
+
+| Column | Type | Description |
+|---|---|---|
+| `title` | string | Citation source title |
+| `url` | string | Citation source URL |
+
+---
+
 ## Manual triggering with Dagster
 
 All Dagster jobs are manual-trigger only; nothing runs on a schedule. Launch
@@ -258,22 +229,22 @@ them from the Dagster UI (Deployment > Jobs > Launch) or the CLI:
 
 ```bash
 # From the repository root
-uv run dagster job launch -m ingestion.definitions -j temporal_ingestion_job
+uv run dagster job launch -m ingestion.definitions -j box_office_ingestion_job
 # Refresh variant (runs the same assets with write_disposition="replace")
-uv run dagster job launch -m ingestion.definitions -j temporal_refresh_job
+uv run dagster job launch -m ingestion.definitions -j box_office_refresh_job
 ```
 
 | Job | What runs |
 |---|---|
-| `tmdb_static_ingestion_job` | TMDB catalogue, details, keywords (merge) |
-| `omdb_static_ingestion_job` | OMDb metadata (merge) |
-| `temporal_ingestion_job` | TMDB popularity + OMDb scores + analysis (append) |
+| `tmdb_catalogue_ingestion_job` | TMDB catalogue (merge) |
+| `box_office_ingestion_job` | OMDb box-office snapshots (append) |
+| `violence_gore_summary_ingestion_job` | Mistral violence/gore summaries (append) |
 | `dbt_job` | dbt transformation models |
 
-Each area also has a `*_refresh_job` (`tmdb_static_refresh_job`,
-`omdb_static_refresh_job`, `temporal_refresh_job`) that runs the same assets
-with `write_disposition="replace"`: it **deletes and rebuilds** the target
-tables, so use it only when you want a full reload.
+Each pipeline also has a `*_refresh_job` (`tmdb_catalogue_refresh_job`,
+`box_office_refresh_job`, `violence_gore_summary_refresh_job`) that runs the
+same assets with `write_disposition="replace"`: it **deletes and rebuilds**
+the target tables, so use it only when you want a full reload.
 
 ### MotherDuck (production destination)
 
@@ -292,4 +263,5 @@ DESTINATION__MOTHERDUCK__CREDENTIALS=md:///horror_movies?motherduck_token=YOUR_T
 - [uv](https://docs.astral.sh/uv/)
 - TMDB API key (free)
 - OMDb API key (free)
+- Mistral API key
 - MotherDuck account (for production runs)
