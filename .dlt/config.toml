@@ -21,8 +21,8 @@ base_url = "https://api.themoviedb.org/3"
 [sources.omdb]
 base_url = "http://www.omdbapi.com/"
 
-[sources.anthropic]
-base_url = "https://api.anthropic.com/v1"
+[sources.mistral]
+base_url = "https://api.mistral.ai/v1"
 
 [destination.duckdb]
 dataset_name = "raw"

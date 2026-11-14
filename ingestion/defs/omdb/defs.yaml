@@ -2,13 +2,9 @@ type: ingestion.components.RefreshableDltLoadCollectionComponent
 
 attributes:
   loads:
-    - source: .loads.omdb_static_load_source
-      pipeline: .loads.omdb_static_pipeline
+    - source: .loads.box_office_load_source
+      pipeline: .loads.box_office_pipeline
       translation:
-        group_name: "omdb_static"
-    - source: .loads.omdb_temporal_load_source
-      pipeline: .loads.omdb_temporal_pipeline
-      translation:
-        group_name: "omdb_temporal"
+        group_name: "box_office"
         deps:
           - "raw/movie_catalogue"

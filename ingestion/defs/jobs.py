@@ -12,23 +12,19 @@ import dagster
 
 from ingestion.components import WRITE_DISPOSITION_TAG
 
-tmdb_static_ingestion_job = dagster.define_asset_job(
-    name="tmdb_static_ingestion_job",
-    selection=dagster.AssetSelection.groups("tmdb_static"),
+tmdb_catalogue_ingestion_job = dagster.define_asset_job(
+    name="tmdb_catalogue_ingestion_job",
+    selection=dagster.AssetSelection.groups("tmdb_catalogue"),
 )
 
-omdb_static_ingestion_job = dagster.define_asset_job(
-    name="omdb_static_ingestion_job",
-    selection=dagster.AssetSelection.groups("omdb_static"),
+box_office_ingestion_job = dagster.define_asset_job(
+    name="box_office_ingestion_job",
+    selection=dagster.AssetSelection.groups("box_office"),
 )
 
-temporal_ingestion_job = dagster.define_asset_job(
-    name="temporal_ingestion_job",
-    selection=dagster.AssetSelection.groups(
-        "tmdb_temporal",
-        "omdb_temporal",
-        "movie_analysis",
-    ),
+violence_gore_summary_ingestion_job = dagster.define_asset_job(
+    name="violence_gore_summary_ingestion_job",
+    selection=dagster.AssetSelection.groups("violence_gore_summary"),
 )
 
 dbt_job = dagster.define_asset_job(
@@ -36,24 +32,23 @@ dbt_job = dagster.define_asset_job(
     selection=dagster.AssetSelection.groups("dbt"),
 )
 
-tmdb_static_refresh_job = dagster.define_asset_job(
-    name="tmdb_static_refresh_job",
-    selection=dagster.AssetSelection.groups("tmdb_static"),
+tmdb_catalogue_refresh_job = dagster.define_asset_job(
+    name="tmdb_catalogue_refresh_job",
+    selection=dagster.AssetSelection.groups("tmdb_catalogue"),
     tags={WRITE_DISPOSITION_TAG: "replace"},
 )
 
-omdb_static_refresh_job = dagster.define_asset_job(
-    name="omdb_static_refresh_job",
-    selection=dagster.AssetSelection.groups("omdb_static"),
+# Deliberate destructive reset (confirmed by user 2026-11-14): the replace tag
+# wipes the append-only ``box_office_snapshots`` snapshot history by design.
+# Use the base ``box_office_ingestion_job`` for normal refreshes.
+box_office_refresh_job = dagster.define_asset_job(
+    name="box_office_refresh_job",
+    selection=dagster.AssetSelection.groups("box_office"),
     tags={WRITE_DISPOSITION_TAG: "replace"},
 )
 
-temporal_refresh_job = dagster.define_asset_job(
-    name="temporal_refresh_job",
-    selection=dagster.AssetSelection.groups(
-        "tmdb_temporal",
-        "omdb_temporal",
-        "movie_analysis",
-    ),
+violence_gore_summary_refresh_job = dagster.define_asset_job(
+    name="violence_gore_summary_refresh_job",
+    selection=dagster.AssetSelection.groups("violence_gore_summary"),
     tags={WRITE_DISPOSITION_TAG: "replace"},
 )

@@ -1,23 +1,16 @@
-"""dlt loads for the OMDb sources (static and temporal)."""
+"""dlt loads for the OMDb box-office source."""
 
 import os
 
 import dlt
 
-from ingestion.sources.api.omdb.main import omdb_static_source, omdb_temporal_source
+from ingestion.sources.api.omdb.main import box_office_source
 
 _DESTINATION = os.getenv("PIPELINE_DESTINATION", "duckdb")
 
-omdb_static_load_source = omdb_static_source()
-omdb_static_pipeline = dlt.pipeline(
-    pipeline_name="omdb_static",
-    dataset_name="raw",
-    destination=_DESTINATION,
-)
-
-omdb_temporal_load_source = omdb_temporal_source()
-omdb_temporal_pipeline = dlt.pipeline(
-    pipeline_name="omdb_temporal",
+box_office_load_source = box_office_source()
+box_office_pipeline = dlt.pipeline(
+    pipeline_name="box_office",
     dataset_name="raw",
     destination=_DESTINATION,
 )

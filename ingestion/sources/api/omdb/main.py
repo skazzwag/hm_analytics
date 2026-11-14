@@ -1,15 +1,12 @@
 """
-dlt sources for the Open Movie Database (OMDb) API.
+dlt source for the Open Movie Database (OMDb) box-office snapshots.
 
-Two sources handle different run cadences:
-
-- `omdb_static_source` — cast, crew, plot, awards, MPAA rating.
-  Run weekly alongside the TMDB static pipeline.
-
-- `omdb_temporal_source` — IMDb rating, Rotten Tomatoes, Metacritic scores.
-  Run daily. Uses a dlt resource state cursor to advance through the movie
-  list in configurable batches, cycling back to the start when complete.
-  This keeps each run well within the 1,000 requests/day free tier limit.
+One source: ``box_office_source`` appends a full-catalogue snapshot of
+IMDb rating, Rotten Tomatoes, Metacritic and box-office values on every
+run. There is no completion or cursor logic — each run mirrors the current
+OMDb state for all catalogue films, and ``scraped_at`` records when each
+snapshot was taken. Final "latest snapshot per film" semantics are derived
+downstream in dbt.
 
 Secrets
 -------
@@ -19,7 +16,7 @@ Resolved from environment variables (loaded via ``.env``):
 """
 
 # dlt config section: keeps SOURCES__OMDB__* env keys and the
-# [sources.omdb] config.toml section stable across the static/temporal split.
+# [sources.omdb] config.toml section stable across source renames.
 __source_name__ = "omdb"
 
 import time
@@ -37,10 +34,11 @@ def read_movie_catalogue() -> list[dict]:
     """
     Read the movie catalogue from the pipeline destination.
 
-    Used by OMDb resources when no explicit movie list is supplied, e.g.
-    when the source runs under Dagster. Queries are issued via dlt's SQL
+    Shared helper for the runtime-dependent sources (``box_office``,
+    ``violence_gore_summary``) when no explicit movie list is supplied,
+    e.g. when they run under Dagster. Queries are issued via dlt's SQL
     client, which works for both local DuckDB and MotherDuck. Results are
-    ordered by ``id`` to keep the OMDb temporal cursor stable.
+    ordered by ``id`` so downstream consumption is deterministic.
 
     Returns
     -------
@@ -105,7 +103,7 @@ def lookup_params(movie: dict) -> dict:
     Returns
     -------
     dict
-        Query parameter dict suitable for passing to ``_omdb_get``.
+        Query parameter dict suitable for passing to ``omdb_get``.
     """
     params: dict = {
         "t": movie.get("title") or movie.get("original_title", ""),
@@ -117,18 +115,21 @@ def lookup_params(movie: dict) -> dict:
     return params
 
 
-@dlt.source(name="omdb_static")
-def omdb_static_source(
+@dlt.source(name="box_office")
+def box_office_source(
     api_key: str = dlt.secrets.value,
     base_url: str = dlt.config.value,
 ):
     """
-    Static OMDb metadata: cast, crew, plot, awards, MPAA rating.
+    OMDb box-office snapshot source: full catalogue every run.
 
-    Run weekly alongside the TMDB static pipeline. Uses merge disposition
-    so re-runs safely update any changed values without duplicating rows.
+    Fetches one OMDb lookup per catalogue film and appends a timestamped
+    snapshot row per film. A full run costs approximately one request per
+    catalogue movie (~1,061), roughly one day's 1,000/day free tier quota,
+    so runs are manual.
 
-    Writes to table: ``omdb_metadata``. Merge on ``imdb_id``.
+    Writes to table: ``box_office_snapshots`` (append-only, keyed on
+    ``imdb_id`` + ``scraped_at``).
 
     Parameters
     ----------
@@ -139,92 +140,13 @@ def omdb_static_source(
     """
 
     @dlt.resource(
-        name="omdb_metadata",
-        write_disposition="merge",
-        primary_key="imdb_id",
-    )
-    def omdb_metadata(movies: list[dict] | None = None) -> Iterator[TDataItems]:
-        """
-        Yield static OMDb metadata for each movie.
-
-        Movies not found on OMDb (``Response: False``) are silently skipped.
-
-        Parameters
-        ----------
-        movies : list[dict], optional
-            Movie records from ``movie_catalogue``, each containing at least
-            ``id``, ``title``, and ``release_date``. Read from the pipeline
-            destination when omitted.
-        """
-        if movies is None:
-            movies = read_movie_catalogue()
-        for movie in movies:
-            data = omdb_get(base_url, api_key, lookup_params(movie))
-            if data.get("Response") == "False":
-                continue
-            yield {
-                "tmdb_id": movie["id"],
-                "imdb_id": data.get("imdbID"),
-                "title": data.get("Title"),
-                "year": data.get("Year"),
-                "rated": data.get("Rated"),
-                "runtime": data.get("Runtime"),
-                "director": data.get("Director"),
-                "writer": data.get("Writer"),
-                "actors": data.get("Actors"),
-                "plot": data.get("Plot"),
-                "awards": data.get("Awards"),
-                "dvd": data.get("DVD"),
-            }
-
-    return omdb_metadata
-
-
-@dlt.source(name="omdb_temporal")
-def omdb_temporal_source(
-    api_key: str = dlt.secrets.value,
-    base_url: str = dlt.config.value,
-    batch_size: int = 800,
-):
-    """
-    Temporal OMDb scores: IMDb rating, Rotten Tomatoes, Metacritic.
-
-    Uses dlt resource state as a persistent cursor to process movies in
-    daily batches. Each run advances the cursor by ``batch_size``, wrapping
-    back to the start when the full list has been covered. This spreads the
-    request load across multiple days and stays within OMDb's 1,000
-    requests/day free tier.
-
-    Writes to table: ``omdb_scores``. Append-only.
-
-    Parameters
-    ----------
-    api_key : str
-        OMDb API key. Resolved from env var ``SOURCES__OMDB__API_KEY``.
-    base_url : str
-        OMDb API base URL. Resolved from ``.dlt/config.toml``.
-    batch_size : int, optional
-        Number of movies to process per run. Default is 800, leaving
-        headroom below the 1,000 requests/day free tier limit.
-
-    Notes
-    -----
-    The ``movies`` argument passed to ``omdb_scores`` must be sorted
-    consistently (e.g. by ``id``) across runs so that the integer cursor
-    always refers to the same position in the list.
-    """
-
-    @dlt.resource(
-        name="omdb_scores",
+        name="box_office_snapshots",
         write_disposition="append",
         primary_key=["imdb_id", "scraped_at"],
     )
-    def omdb_scores(movies: list[dict] | None = None) -> Iterator[TDataItems]:
+    def box_office_snapshots(movies: list[dict] | None = None) -> Iterator[TDataItems]:
         """
-        Yield a score snapshot for the current batch of movies.
-
-        Reads and advances a persistent cursor stored in dlt resource state.
-        The cursor resets to 0 after the full movie list has been processed.
+        Yield a box-office snapshot for every movie in the catalogue.
 
         Parameters
         ----------
@@ -236,20 +158,10 @@ def omdb_temporal_source(
         if movies is None:
             movies = read_movie_catalogue()
 
-        state = dlt.current.resource_state()
-        cursor = state.get("cursor", 0)
-
-        # Wrap cursor if the movie list has shrunk or a cycle just completed
-        if cursor >= len(movies):
-            cursor = 0
-
-        batch = movies[cursor : cursor + batch_size]
         scraped_at = datetime.now(timezone.utc)
-        processed = 0
 
-        for movie in batch:
+        for movie in movies:
             data = omdb_get(base_url, api_key, lookup_params(movie))
-            processed += 1
             if data.get("Response") == "False":
                 continue
 
@@ -275,7 +187,4 @@ def omdb_temporal_source(
                 "box_office": data.get("BoxOffice"),
             }
 
-        new_cursor = cursor + processed
-        state["cursor"] = new_cursor if new_cursor < len(movies) else 0
-
-    return omdb_scores
+    return box_office_snapshots

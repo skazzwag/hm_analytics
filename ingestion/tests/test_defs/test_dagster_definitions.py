@@ -7,6 +7,7 @@ from pathlib import Path
 import dagster
 import pytest
 from dagster import RepositoryDefinition
+from unittest import mock
 
 from ingestion.components import WRITE_DISPOSITION_TAG
 
@@ -24,26 +25,22 @@ pytestmark = pytest.mark.skipif(
 )
 
 BASE_JOB_NAMES = {
-    "tmdb_static_ingestion_job",
-    "omdb_static_ingestion_job",
-    "temporal_ingestion_job",
+    "tmdb_catalogue_ingestion_job",
+    "box_office_ingestion_job",
+    "violence_gore_summary_ingestion_job",
     "dbt_job",
 }
 REFRESH_JOB_NAMES = {
-    "tmdb_static_refresh_job",
-    "omdb_static_refresh_job",
-    "temporal_refresh_job",
+    "tmdb_catalogue_refresh_job",
+    "box_office_refresh_job",
+    "violence_gore_summary_refresh_job",
 }
 
-# The seven raw asset keys (ADR 0001, migration step 5).
+# The three unique raw asset keys.
 RAW_ASSET_KEYS = {
     "raw/movie_catalogue",
-    "raw/movie_details",
-    "raw/movie_keywords",
-    "raw/movie_popularity",
-    "raw/omdb_metadata",
-    "raw/omdb_scores",
-    "raw/violence_gore_analysis",
+    "raw/box_office_snapshots",
+    "raw/violence_gore_summary",
 }
 
 
@@ -53,6 +50,26 @@ def _set_minimal_ingestion_env() -> None:
     os.environ.setdefault("PIPELINE_DESTINATION", "duckdb")
     os.environ.setdefault("DBT_TARGET", "dev-local")
     os.environ.setdefault("DAGSTER_ENVIRONMENT", "dev")
+    # Dummy credentials so dlt source instantiation at import time resolves;
+    # no real API calls are made by definition loading.
+    os.environ.setdefault("SOURCES__TMDB__TMDB_CATALOGUE__API_KEY", "test-key")
+    os.environ.setdefault("SOURCES__OMDB__BOX_OFFICE__API_KEY", "test-key")
+    os.environ.setdefault("SOURCES__MISTRAL__VIOLENCE_GORE_SUMMARY__API_KEY", "test-key")
+    os.environ.setdefault("SOURCES__MISTRAL__VIOLENCE_GORE_SUMMARY__BASE_URL", "https://api.mistral.ai/v1")
+
+
+def _patch_tmdb_fetch() -> mock._patch:
+    """Patch the TMDB discover pagination as a safety net.
+
+    ``paginate_discover`` is now called lazily inside the resource body,
+    so definition loading makes no HTTP requests; the patch remains so a
+    stray pipeline run during tests cannot reach the live API.
+    """
+
+    return mock.patch(
+        "ingestion.sources.api.tmdb.main.paginate_discover",
+        return_value=[],
+    )
 
 
 def _load_repository() -> RepositoryDefinition:
@@ -60,9 +77,10 @@ def _load_repository() -> RepositoryDefinition:
 
     _set_minimal_ingestion_env()
 
-    definitions_module = importlib.import_module("ingestion.definitions")
-    definitions_obj = definitions_module.definitions()
-    return definitions_obj.get_repository_def()
+    with _patch_tmdb_fetch():
+        definitions_module = importlib.import_module("ingestion.definitions")
+        definitions_obj = definitions_module.definitions()
+        return definitions_obj.get_repository_def()
 
 
 def _load_definitions() -> dagster.Definitions:
@@ -70,8 +88,9 @@ def _load_definitions() -> dagster.Definitions:
 
     _set_minimal_ingestion_env()
 
-    definitions_module = importlib.import_module("ingestion.definitions")
-    return definitions_module.definitions()
+    with _patch_tmdb_fetch():
+        definitions_module = importlib.import_module("ingestion.definitions")
+        return definitions_module.definitions()
 
 
 def test_definitions_load_exposes_ingestion_jobs() -> None:
@@ -107,7 +126,7 @@ def test_refresh_jobs_carry_write_disposition_tag() -> None:
 
 
 def test_raw_asset_keys_are_unique_and_complete() -> None:
-    """The dlt loads must expose exactly the seven unique raw asset keys."""
+    """The dlt loads must expose exactly the three unique raw asset keys."""
 
     definitions_obj = _load_definitions()
 
@@ -126,8 +145,32 @@ def test_raw_asset_keys_are_unique_and_complete() -> None:
     assert raw_count == len(RAW_ASSET_KEYS)
 
 
+def test_box_office_snapshots_resource_is_append_with_snapshot_key() -> None:
+    """The box_office_snapshots dlt resource appends with the snapshot key."""
+
+    loads = importlib.import_module("ingestion.defs.omdb.loads")
+    resource = loads.box_office_load_source.resources["box_office_snapshots"]
+
+    assert resource.write_disposition == "append"
+    assert list(resource._hints.get("primary_key")) == ["imdb_id", "scraped_at"]
+
+
+def test_raw_asset_keys_exact_set() -> None:
+    """No raw/* asset may exist beyond the three pipeline outputs."""
+
+    definitions_obj = _load_definitions()
+
+    raw_asset_keys = {
+        spec.key.to_user_string()
+        for asset in definitions_obj.assets
+        for spec in asset.specs
+        if spec.key.to_user_string().startswith("raw/")
+    }
+    assert raw_asset_keys == RAW_ASSET_KEYS
+
+
 def test_runtime_readers_depend_on_movie_catalogue() -> None:
-    """omdb_temporal and movie_analysis loads must depend on raw/movie_catalogue."""
+    """box_office and violence_gore_summary loads must depend on raw/movie_catalogue."""
 
     definitions_obj = _load_definitions()
 
@@ -138,6 +181,5 @@ def test_runtime_readers_depend_on_movie_catalogue() -> None:
                 dep.asset_key.to_user_string() for dep in spec.deps
             }
 
-    assert "raw/movie_catalogue" in deps_by_asset["raw/omdb_scores"]
-    assert "raw/movie_catalogue" in deps_by_asset["raw/violence_gore_analysis"]
-    assert "raw/movie_catalogue" not in deps_by_asset.get("raw/movie_popularity", set())
+    assert "raw/movie_catalogue" in deps_by_asset["raw/box_office_snapshots"]
+    assert "raw/movie_catalogue" in deps_by_asset["raw/violence_gore_summary"]

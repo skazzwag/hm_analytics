@@ -2,11 +2,7 @@ type: ingestion.components.RefreshableDltLoadCollectionComponent
 
 attributes:
   loads:
-    - source: .loads.tmdb_static_load_source
-      pipeline: .loads.tmdb_static_pipeline
+    - source: .loads.tmdb_catalogue_load_source
+      pipeline: .loads.tmdb_catalogue_pipeline
       translation:
-        group_name: "tmdb_static"
-    - source: .loads.tmdb_temporal_load_source
-      pipeline: .loads.tmdb_temporal_pipeline
-      translation:
-        group_name: "tmdb_temporal"
+        group_name: "tmdb_catalogue"

@@ -4,6 +4,21 @@ Production runner for the horror movie ingestion pipelines.
 Thin CLI wrapper around the dlt sources for manual runs without Dagster.
 The Dagster asset jobs in ``ingestion/defs/jobs.py`` run the same sources
 via manual triggers.
+
+Pipelines (in dependency order):
+
+1. ``tmdb_catalogue`` — TMDB discover catalogue feeding ``movie_catalogue``.
+2. ``box_office`` — OMDb snapshot of ratings/box office for the catalogue.
+3. ``violence_gore_summary`` — Mistral web-search summaries for the catalogue.
+
+The two downstream pipelines read ``movie_catalogue`` from the pipeline
+destination at runtime, so run ``tmdb_catalogue`` first on a fresh database.
+
+Usage::
+
+    uv run python -m ingestion.run_pipeline                # all three
+    uv run python -m ingestion.run_pipeline --tmdb         # catalogue only
+    uv run python -m ingestion.run_pipeline --box-office --violence-gore
 """
 
 import argparse
@@ -12,9 +27,9 @@ import os
 
 import dlt
 
-from ingestion.sources.api.movie_analysis.main import movie_analysis_source
-from ingestion.sources.api.omdb.main import omdb_static_source, omdb_temporal_source
-from ingestion.sources.api.tmdb.main import tmdb_static_source, tmdb_temporal_source
+from ingestion.sources.api.omdb.main import box_office_source
+from ingestion.sources.api.tmdb.main import tmdb_catalogue_source
+from ingestion.sources.api.violence_gore_summary.main import violence_gore_summary_source
 
 DATASET_NAME = "raw"
 DESTINATION = os.getenv("PIPELINE_DESTINATION", "duckdb")
@@ -22,165 +37,89 @@ DESTINATION = os.getenv("PIPELINE_DESTINATION", "duckdb")
 logger = logging.getLogger(__name__)
 
 
-def get_movies() -> list[dict]:
+def run_tmdb_catalogue(max_pages: int) -> None:
     """
-    Read the movie catalogue from the pipeline destination.
+    Run the TMDB catalogue pipeline.
 
-    Used to provide the movie list to OMDb sources. Queries are issued
-    via dlt's SQL client, which works for both local DuckDB and MotherDuck.
-    Results are ordered by ``id`` to keep the OMDb temporal cursor stable.
-
-    Returns
-    -------
-    list[dict]
-        Records from ``movie_catalogue`` with keys ``id``, ``title``,
-        ``original_title``, and ``release_date``.
-    """
-    pipeline = dlt.pipeline(
-        pipeline_name="tmdb_static",
-        destination=DESTINATION,
-        dataset_name=DATASET_NAME,
-    )
-    with pipeline.sql_client() as client:
-        table = client.make_qualified_table_name("movie_catalogue")
-        with client.execute_query(
-            f"SELECT id, title, original_title, release_date FROM {table} ORDER BY id"
-        ) as cursor:
-            cols = [d[0] for d in cursor.description]
-            return [dict(zip(cols, row)) for row in cursor.fetchall()]
-
-
-def run_tmdb_static(max_pages: int) -> None:
-    """
-    Run the TMDB static pipeline.
-
-    Fetches the movie catalogue, full details, and keywords. Paginates the
-    discover endpoint once and shares IDs across all three resources.
+    Fetches static fields for the horror catalogue from the discover
+    endpoint and merges them into ``movie_catalogue``.
 
     Parameters
     ----------
     max_pages : int
         Maximum number of discover pages to fetch (20 movies per page).
     """
-    logger.info("Running TMDB static pipeline (max_pages=%d)...", max_pages)
+    logger.info("Running TMDB catalogue pipeline (max_pages=%d)...", max_pages)
     load_info = dlt.pipeline(
-        pipeline_name="tmdb_static",
+        pipeline_name="tmdb_catalogue",
         destination=DESTINATION,
         dataset_name=DATASET_NAME,
-    ).run(tmdb_static_source(max_pages=max_pages))
-    logger.info("TMDB static complete: %s", load_info)
+    ).run(tmdb_catalogue_source(max_pages=max_pages))
+    logger.info("TMDB catalogue complete: %s", load_info)
 
 
-def run_tmdb_temporal(max_pages: int) -> None:
+def run_box_office() -> None:
     """
-    Run the TMDB temporal pipeline.
+    Run the OMDb box-office snapshot pipeline.
 
-    Appends a popularity and vote snapshot for the current horror movies.
-
-    Parameters
-    ----------
-    max_pages : int
-        Maximum number of discover pages to fetch (20 movies per page).
+    Reads the full movie catalogue from the pipeline destination and
+    fetches IMDb rating, Rotten Tomatoes, Metacritic and box-office
+    values for every movie. Uses one OMDb request per movie — run
+    selectively to stay within the 1,000 requests/day free tier.
     """
-    logger.info("Running TMDB temporal pipeline (max_pages=%d)...", max_pages)
+    logger.info("Running box-office pipeline...")
     load_info = dlt.pipeline(
-        pipeline_name="tmdb_temporal",
+        pipeline_name="box_office",
         destination=DESTINATION,
         dataset_name=DATASET_NAME,
-    ).run(tmdb_temporal_source(max_pages=max_pages))
-    logger.info("TMDB temporal complete: %s", load_info)
+    ).run(box_office_source())
+    logger.info("Box-office complete: %s", load_info)
 
 
-def run_omdb_static() -> None:
+def run_violence_gore_summary() -> None:
     """
-    Run the OMDb static pipeline.
+    Run the violence/gore summary pipeline.
 
-    Reads the full movie catalogue and fetches static metadata (cast, crew,
-    plot, MPAA rating) for every movie. Uses one OMDb request per movie —
-    run selectively to stay within the 1,000 requests/day free tier.
+    Reads the movie catalogue from the pipeline destination and requests
+    a concise violence/gore summary per movie from the Mistral
+    Conversations API, appending the raw responses.
     """
-    movies = get_movies()
-    logger.info("Running OMDb static pipeline (%d movies)...", len(movies))
+    logger.info("Running violence/gore summary pipeline...")
     load_info = dlt.pipeline(
-        pipeline_name="omdb_static",
+        pipeline_name="violence_gore_summary",
         destination=DESTINATION,
         dataset_name=DATASET_NAME,
-    ).run(omdb_static_source().omdb_metadata(movies=movies))
-    logger.info("OMDb static complete: %s", load_info)
-
-
-def run_omdb_temporal(batch_size: int) -> None:
-    """
-    Run the OMDb temporal pipeline.
-
-    Scores the next batch of movies via the persistent dlt state cursor,
-    advancing one batch per run and cycling back after the full list.
-
-    Parameters
-    ----------
-    batch_size : int
-        Movies to score per run (max ~900 for the free tier).
-    """
-    movies = get_movies()
-    logger.info(
-        "Running OMDb temporal pipeline (%d movies, batch_size=%d)...",
-        len(movies),
-        batch_size,
-    )
-    load_info = dlt.pipeline(
-        pipeline_name="omdb_temporal",
-        destination=DESTINATION,
-        dataset_name=DATASET_NAME,
-    ).run(omdb_temporal_source(batch_size=batch_size).omdb_scores(movies=movies))
-    logger.info("OMDb temporal complete: %s", load_info)
-
-
-def run_movie_analysis(batch_size: int) -> None:
-    """
-    Run the violence/gore analysis pipeline.
-
-    Sends unprocessed movies to the Anthropic API for a violence/gore
-    assessment and appends the raw responses.
-
-    Parameters
-    ----------
-    batch_size : int
-        Maximum number of movies to analyze in this run.
-    """
-    logger.info("Running violence/gore analysis pipeline (batch_size=%d)...", batch_size)
-    load_info = dlt.pipeline(
-        pipeline_name="violence_gore_analysis",
-        destination=DESTINATION,
-        dataset_name=DATASET_NAME,
-    ).run(movie_analysis_source(batch_size=batch_size))
-    logger.info("Analysis pipeline complete: %s", load_info)
+    ).run(violence_gore_summary_source())
+    logger.info("Violence/gore summary complete: %s", load_info)
 
 
 def main() -> None:
     """
     Parse CLI arguments and dispatch to the appropriate pipeline functions.
 
-    Defaults to the temporal pipelines when neither ``--static`` nor
-    ``--temporal`` is specified.
+    Runs all three pipelines when no per-pipeline flag is given; otherwise
+    runs only the selected ones, in dependency order.
     """
     parser = argparse.ArgumentParser(
-        description="Run the horror movie ingestion pipeline.",
-    )
-    parser.add_argument(
-        "--static",
-        action="store_true",
-        help=(
-            "Run the static pipelines (TMDB catalogue/details/keywords "
-            "+ OMDb metadata)."
+        description=(
+            "Run the horror movie ingestion pipelines. Defaults to all "
+            "three; per-pipeline flags select a subset."
         ),
     )
     parser.add_argument(
-        "--temporal",
+        "--tmdb",
         action="store_true",
-        help=(
-            "Run the temporal pipelines (TMDB popularity, OMDb scores, "
-            "analysis). Default when neither flag is given."
-        ),
+        help="Run the TMDB catalogue pipeline (movie_catalogue).",
+    )
+    parser.add_argument(
+        "--box-office",
+        action="store_true",
+        help="Run the OMDb box-office snapshot pipeline (~1 request/movie).",
+    )
+    parser.add_argument(
+        "--violence-gore",
+        action="store_true",
+        help="Run the Mistral violence/gore summary pipeline (~1 request/movie).",
     )
     parser.add_argument(
         "--max-pages",
@@ -189,13 +128,6 @@ def main() -> None:
         metavar="N",
         help="Max TMDB discover pages to fetch (20 movies/page). Default: 25.",
     )
-    parser.add_argument(
-        "--omdb-batch-size",
-        type=int,
-        default=800,
-        metavar="N",
-        help="Movies to score per OMDb temporal run (max ~900 for free tier). Default: 800.",
-    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -203,13 +135,14 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(name)s — %(message)s",
     )
 
-    if args.static:
-        run_tmdb_static(max_pages=args.max_pages)
-        run_omdb_static()
-    else:
-        run_tmdb_temporal(max_pages=args.max_pages)
-        run_omdb_temporal(batch_size=args.omdb_batch_size)
-        run_movie_analysis(batch_size=300)
+    run_all = not (args.tmdb or args.box_office or args.violence_gore)
+
+    if run_all or args.tmdb:
+        run_tmdb_catalogue(max_pages=args.max_pages)
+    if run_all or args.box_office:
+        run_box_office()
+    if run_all or args.violence_gore:
+        run_violence_gore_summary()
 
 
 if __name__ == "__main__":
