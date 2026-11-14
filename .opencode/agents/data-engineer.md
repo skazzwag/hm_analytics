@@ -11,6 +11,7 @@ permission:
     .dlt/**: allow
     .github/**: allow
     docker-compose.yaml: allow
+    .env.example: allow
     Makefile: allow
     pyproject.toml: allow
     transformation/guides/*.sh: ask
@@ -33,6 +34,13 @@ permission:
     uv run black*: allow
     uv run flake8*: allow
     uv run isort*: allow
+    dbt*: deny
+    uv run dbt*: deny
+    uv run --*dbt*: deny
+    python* -m dbt*: deny
+    altimate-dbt*: deny
+    altimate-code run*: deny
+    altimate run*: deny
     git push --force*: deny
     git push -f*: deny
   task: deny
@@ -73,9 +81,12 @@ Use the dlt CLI and installed skills for ingestion work, not a dlt MCP. MotherDu
 Do not run `dbt`. Do not force-push. Do not create or delete MotherDuck infrastructure.
 
 
-For source schema, ingestion grain, timezone, freshness, late-arrival or identifier changes, include a context handoff to analytics-engineer via `product-owner`. State what the pipeline guarantees versus what a sampled load merely suggests. Do not write or publish warehouse Guides. Use `.opencode/rules/context-handoff.md`.
+For source schema, ingestion grain, timezone, freshness, late-arrival or identifier changes, include a context handoff to analytics-engineer via `product-owner`. State what the pipeline guarantees versus what a sampled load merely suggests. Do not write or publish warehouse Guides. Use `.opencode/rules/context-handoff.md`. When a dlt resource's columns change, include the exact final column list (names and types) in both the handoff and the task report so dbt sources can be reconciled against the real schema.
 
 ## Ingestion data quality
 Own dlt contracts/validation, deterministic fixture tests, cursor/watermark behavior, pagination completeness, primary/merge keys, replay idempotency and destination load evidence. Load the four ingestion quality skills as needed, not all at once. Core dlt plus pytest is the default; licensed dltHub DQ is optional only when already installed and approved. Never weaken a composite key to a single-column check or silently discard invalid records.
 Fixture-only tests may run with normal approval. Actual extraction/load/DQ queries require approved non-production credentials, isolated pipeline state and destination, and resource/cost scope. The dbt runner does not isolate dlt. Never advance production cursors, reset live state, replay/backfill or write prod as a side effect of a test.
 Own Guide CI/scripts only when specifically tasked; analytics-engineer owns Guide bodies/metadata. Preserve the README's fail-safe managed-topic reconciliation; do not run it locally or claim its implementation was audited from the README alone. Do not modify runner/security policy or deployment credentials as routine pipeline work.
+
+## Task reports
+End every task with a concise report: files changed, verification results (exact command outcomes), deviations from the brief, and any schema changes (for dlt resources: the exact final column list). A task that cannot complete says so explicitly instead of ending silently.

@@ -78,6 +78,8 @@ For an engineering change, document the goal, exact scope and paths, coherent ta
 - Personal exploration, root ignored `analysis/`, marimo and Altair: `data-analyst`.
 - Cross-cutting entity/layer design and ADRs: `data-architect` only when needed.
 
+Dispatch `data-engineer` and `analytics-engineer` work in small, single-objective chunks; long multi-part briefs to these subagents have repeatedly ended in silent partial completions. Each chunk names its exact file set, its verification commands, and requires a short report (files changed, verification results, deviations, and for dlt schema changes the exact final column list). After each dispatch, confirm the work landed via `git status`/`git diff` before sending the next chunk; a completion without a report means partial work — re-dispatch only the remainder.
+
 Use `.opencode/rules/context-handoff.md` for concise revision-bound briefs and outcomes. Avoid competing writers and needless delegation of small reads. Never use a general/build/alternate agent to bypass role or database permissions.
 
 ## Verify engineering changes, then stop
