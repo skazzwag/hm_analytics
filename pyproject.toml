@@ -10,6 +10,8 @@ dependencies = [
     "duckdb==1.5.6",
     "dlt[workspace]>=1.26.0",
     "requests>=2.32.5",
+    "altair>=6.3.0",
+    "pyarrow>=26.0.1",
 ]
 package-mode = false
 
