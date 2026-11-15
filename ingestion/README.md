@@ -42,8 +42,8 @@ destination at runtime, so the `tmdb_catalogue` load must run first. In
 Dagster this ordering is enforced by asset dependencies (`raw/box_office_snapshots`
 and `raw/violence_gore_summary` depend on `raw/movie_catalogue`), which also
 orders the assets within `box_office_ingestion_job` and
-`violence_gore_summary_ingestion_job`. Without Dagster, run
-`uv run ingestion/run_pipeline.py --tmdb` once before the other pipelines.
+`violence_gore_summary_ingestion_job`; trigger
+`tmdb_catalogue_ingestion_job` first when loading a fresh warehouse.
 
 ## Dagster jobs
 
@@ -59,7 +59,6 @@ in `ingestion/components.py`.
 - Start local Dagster stack: `make serve`
 - Tear down: `make teardown`
 - Lightweight local process (no Docker): `make dev`
-- Run pipelines without Dagster: `uv run ingestion/run_pipeline.py [--tmdb | --box-office | --violence-gore]`
 - Validate defs/YAML: `PYTHONPATH=. uv run dg check yaml` (the project is not
   an installed package, so dg CLI needs the repo root on `PYTHONPATH` to
   resolve the project-local component type)
