@@ -56,7 +56,7 @@ models:
           - accepted_values:
               values: ['Mild', 'Moderate', 'High', 'Extreme']
               config:
-                enabled: "{{ var('use_ai_functions') }}"
+                enabled: "{{ var('use_ai_functions', false) }}"
       - name: severity_score
         data_type: double
         description: >
@@ -80,7 +80,7 @@ models:
           - accepted_values:
               values: ['Isolated', 'Occasional', 'Frequent', 'Pervasive']
               config:
-                enabled: "{{ var('use_ai_functions') }}"
+                enabled: "{{ var('use_ai_functions', false) }}"
       - name: frequency_score
         data_type: double
         description: >
@@ -93,3 +93,11 @@ models:
           "Calibrated model confidence (0-1) in the frequency answer; low
           values flag rows for review (no pre-build validation exists).
           NULL when unclassified or classification is disabled."
+      - name: classified_at
+        data_type: timestamp
+        description: >
+          "UTC scraped_at of the summary snapshot that was classified
+          (deterministic classification provenance from
+          int_violence_classification, not the build time). NULL when the
+          film is unclassified or the classification model is disabled
+          (dev-local)."

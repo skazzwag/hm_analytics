@@ -8,6 +8,21 @@ macros:
         type: string
         description: Column to title-case
 
+  - name: jev_score_to_label
+    description: >
+      Map a Jev rubric score (weighted 0-3 position) to its criterion label:
+      round to the nearest criterion index and offset by 1 (DuckDB lists are
+      1-indexed). round() is half-away-from-zero, so exact .5 ties select the
+      higher criterion. Boundary behavior is asserted by the singular test
+      tests/jev_score_to_label_boundaries.sql.
+    arguments:
+      - name: criteria
+        type: list
+        description: Ordered list of criterion labels (index 0 = score 0)
+      - name: score
+        type: string
+        description: SQL expression returning the weighted 0-3 score
+
   - name: drop_schema
     description: Drop a schema in the selected database.
     arguments:

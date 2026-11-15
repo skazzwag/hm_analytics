@@ -1,4 +1,4 @@
-{{ config(materialized='table', enabled=var('use_ai_functions')) }}
+{{ config(materialized='table', enabled=var('use_ai_functions', false)) }}
 
 -- One row per movie: Jev-classified violence/gore severity and frequency for
 -- the latest summary snapshot per tmdb_id (same dedup pattern as
@@ -75,16 +75,13 @@ final as (
         classified.title,
         classified.release_date,
         classified.summary,
-        -- score is a weighted position on the 0-3 rubric; round it to the
-        -- nearest criterion index. DuckDB lists are 1-indexed, so offset by 1.
-        ['Mild', 'Moderate', 'High', 'Extreme'][
-            round(classified.answer.severity.score) + 1
-        ] as severity,
+        -- score is a weighted position on the 0-3 rubric; the macro rounds
+        -- to the nearest criterion index (DuckDB lists are 1-indexed, and
+        -- round() is half-away-from-zero, so .5 ties pick the higher label).
+        {{ jev_score_to_label(['Mild', 'Moderate', 'High', 'Extreme'], 'classified.answer.severity.score') }} as severity,
         classified.answer.severity.score as severity_score,
         classified.answer.severity.confidence as severity_confidence,
-        ['Isolated', 'Occasional', 'Frequent', 'Pervasive'][
-            round(classified.answer.frequency.score) + 1
-        ] as frequency,
+        {{ jev_score_to_label(['Isolated', 'Occasional', 'Frequent', 'Pervasive'], 'classified.answer.frequency.score') }} as frequency,
         classified.answer.frequency.score as frequency_score,
         classified.answer.frequency.confidence as frequency_confidence,
         -- Deterministic provenance: the scrape timestamp of the classified

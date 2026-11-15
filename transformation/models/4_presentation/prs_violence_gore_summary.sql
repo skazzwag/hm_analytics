@@ -29,7 +29,8 @@ with classification as (
         severity_confidence,
         frequency,
         frequency_score,
-        frequency_confidence
+        frequency_confidence,
+        classified_at
     from {{ ref('int_violence_classification') }}
 ),
 {% endif %}
@@ -74,6 +75,7 @@ final as (
         ,classification.frequency
         ,classification.frequency_score
         ,classification.frequency_confidence
+        ,classification.classified_at
         {% else %}
         ,cast(null as varchar) as severity
         ,cast(null as double) as severity_score
@@ -81,6 +83,7 @@ final as (
         ,cast(null as varchar) as frequency
         ,cast(null as double) as frequency_score
         ,cast(null as double) as frequency_confidence
+        ,cast(null as timestamp) as classified_at
         {% endif %}
     from summary_latest
     {% if var('use_ai_functions', false) %}
@@ -104,5 +107,6 @@ select
     final.severity_confidence,
     final.frequency,
     final.frequency_score,
-    final.frequency_confidence
+    final.frequency_confidence,
+    final.classified_at
 from final

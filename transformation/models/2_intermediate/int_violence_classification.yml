@@ -32,7 +32,7 @@ models:
         data_tests:
           - not_null:
               config:
-                enabled: "{{ var('use_ai_functions') }}"
+                enabled: "{{ var('use_ai_functions', false) }}"
       - name: title
         data_type: varchar
         description: "Movie title analysed"
@@ -50,12 +50,15 @@ models:
         data_tests:
           - not_null:
               config:
-                enabled: "{{ var('use_ai_functions') }}"
+                enabled: "{{ var('use_ai_functions', false) }}"
       - name: severity_score
         data_type: double
         description: >
           "Weighted position on the ordered severity rubric, 0-3 (0 = Mild,
-          3 = Extreme); values between integers sit between criteria"
+          3 = Extreme); values between integers sit between criteria. The
+          severity label maps this score via round(), which is
+          half-away-from-zero: exact .5 ties round to the higher criterion
+          (e.g. 2.5 -> Extreme)"
       - name: severity_confidence
         data_type: double
         description: >
@@ -69,13 +72,15 @@ models:
         data_tests:
           - not_null:
               config:
-                enabled: "{{ var('use_ai_functions') }}"
+                enabled: "{{ var('use_ai_functions', false) }}"
       - name: frequency_score
         data_type: double
         description: >
           "Weighted position on the ordered frequency rubric, 0-3 (0 =
           Isolated, 3 = Pervasive); values between integers sit between
-          criteria"
+          criteria. The frequency label maps this score via round(), which
+          is half-away-from-zero: exact .5 ties round to the higher
+          criterion (e.g. 2.5 -> Pervasive)"
       - name: frequency_confidence
         data_type: double
         description: >
@@ -89,4 +94,4 @@ models:
         data_tests:
           - not_null:
               config:
-                enabled: "{{ var('use_ai_functions') }}"
+                enabled: "{{ var('use_ai_functions', false) }}"
