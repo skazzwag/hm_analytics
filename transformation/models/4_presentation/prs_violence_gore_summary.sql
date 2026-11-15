@@ -67,23 +67,23 @@ final as (
         summary_latest.summary,
         summary_latest.model as summary_model,
         summary_latest.scraped_at,
-        citations.citations
+        citations.citations,
         {% if var('use_ai_functions', false) %}
-        ,classification.severity
-        ,classification.severity_score
-        ,classification.severity_confidence
-        ,classification.frequency
-        ,classification.frequency_score
-        ,classification.frequency_confidence
-        ,classification.classified_at
+        classification.severity,
+        classification.severity_score,
+        classification.severity_confidence,
+        classification.frequency,
+        classification.frequency_score,
+        classification.frequency_confidence,
+        classification.classified_at
         {% else %}
-        ,cast(null as varchar) as severity
-        ,cast(null as double) as severity_score
-        ,cast(null as double) as severity_confidence
-        ,cast(null as varchar) as frequency
-        ,cast(null as double) as frequency_score
-        ,cast(null as double) as frequency_confidence
-        ,cast(null as timestamp) as classified_at
+        cast(null as varchar) as severity,
+        cast(null as double) as severity_score,
+        cast(null as double) as severity_confidence,
+        cast(null as varchar) as frequency,
+        cast(null as double) as frequency_score,
+        cast(null as double) as frequency_confidence,
+        cast(null as timestamp) as classified_at
         {% endif %}
     from summary_latest
     {% if var('use_ai_functions', false) %}

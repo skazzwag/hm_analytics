@@ -3,6 +3,7 @@
 Load this file when writing or reviewing SQL (dbt models, DuckDB CLI, MotherDuck queries).
 
 - Follow project sqlfluff rules. 4-space indent for SQL, 2-space for YAML.
+- Trailing commas in column lists, never leading commas (sqlfluff layout: `line_position = trailing`).
 - Meaningful aliases. Never single-letter aliases.
 - Explicit column lists. `SELECT *` only in staging models or data-mart copy models.
 - **RF02:** qualify every column when more than one table/CTE is in scope, including `QUALIFY`, calculated fields, and `WHERE`.
