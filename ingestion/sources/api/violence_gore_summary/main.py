@@ -44,7 +44,7 @@ class Citation(TypedDict):
     """One web-search citation extracted from a ``tool_reference`` chunk."""
 
     title: str | None
-    url: str | None
+    url: str
 
 
 class ContentChunk(TypedDict, total=False):
@@ -126,8 +126,9 @@ def summarize_violence_gore(
     -------
     ParsedSummary
         Keys ``summary`` (text of the final assistant message) and
-        ``citations`` (list of ``Citation`` dicts with ``title`` and ``url``
-        from ``tool_reference`` chunks; empty when nothing was cited).
+        ``citations`` (list of ``Citation`` dicts, each with a
+        non-empty ``url`` and a ``title`` that may be ``None``, from
+        ``tool_reference`` chunks; empty when nothing was cited).
 
     Raises
     ------
@@ -180,7 +181,9 @@ def parse_message_content(content: str | list[ContentChunk]) -> ParsedSummary:
     Message content is either a plain string or a list of typed chunks.
     ``text`` chunks carry the summary; ``tool_reference`` chunks carry
     web-search provenance (title and URL); everything else (thinking
-    chunks, images, tool files) is ignored.
+    chunks, images, tool files) is ignored. ``tool_reference`` chunks
+    without a URL are skipped: a citation with no URL is useless
+    provenance and would violate the downstream ``not_null`` contract.
 
     Parameters
     ----------
@@ -191,7 +194,8 @@ def parse_message_content(content: str | list[ContentChunk]) -> ParsedSummary:
     -------
     ParsedSummary
         Keys ``summary`` (concatenated ``text`` chunks) and ``citations``
-        (list of ``Citation`` dicts with ``title`` and ``url``).
+        (list of ``Citation`` dicts, each with a non-empty ``url`` and a
+        ``title`` that may be ``None``).
     """
     if isinstance(content, str):
         return {"summary": content, "citations": []}
@@ -204,7 +208,9 @@ def parse_message_content(content: str | list[ContentChunk]) -> ParsedSummary:
         if chunk_type == "text":
             summary_chunks.append(chunk.get("text", ""))
         elif chunk_type == "tool_reference":
-            citations.append({"title": chunk.get("title"), "url": chunk.get("url")})
+            url = chunk.get("url")
+            if url:
+                citations.append({"title": chunk.get("title"), "url": url})
 
     return {"summary": "".join(summary_chunks), "citations": citations}
 
