@@ -26,11 +26,10 @@ __source_name__ = "mistral"
 import logging
 import time
 from datetime import datetime, timezone
-from typing import Iterator
+from typing import Iterator, TypedDict
 
 import dlt
 import requests
-from dlt.common.typing import TDataItems
 
 from ingestion.sources.api.omdb.main import read_movie_catalogue
 
@@ -39,6 +38,42 @@ DEFAULT_MODEL = "mistral-medium-latest"
 CONVERSATIONS_PATH = "/conversations"
 
 logger = logging.getLogger(__name__)
+
+
+class Citation(TypedDict):
+    """One web-search citation extracted from a ``tool_reference`` chunk."""
+
+    title: str | None
+    url: str | None
+
+
+class ContentChunk(TypedDict, total=False):
+    """One typed chunk of a Mistral ``message.output`` content list."""
+
+    type: str
+    text: str
+    title: str
+    url: str
+
+
+class ParsedSummary(TypedDict):
+    """Result of splitting a Mistral message body into text and citations."""
+
+    summary: str
+    citations: list[Citation]
+
+
+class SummaryResult(TypedDict):
+    """One yielded ``violence_gore_summary`` row (ingestion schema)."""
+
+    title: str
+    release_date: str
+    tmdb_id: int
+    model: str
+    summary: str
+    citations: list[Citation]
+    scraped_at: datetime
+
 
 INSTRUCTIONS = (
     "You research movies using web search and answer with concise, "
@@ -65,7 +100,7 @@ def summarize_violence_gore(
     api_key: str,
     base_url: str,
     model: str = DEFAULT_MODEL,
-) -> dict:
+) -> ParsedSummary:
     """
     Request a concise violence/gore summary for one movie from Mistral.
 
@@ -89,10 +124,10 @@ def summarize_violence_gore(
 
     Returns
     -------
-    dict
+    ParsedSummary
         Keys ``summary`` (text of the final assistant message) and
-        ``citations`` (list of dicts with ``title`` and ``url`` from
-        ``tool_reference`` chunks; empty when nothing was cited).
+        ``citations`` (list of ``Citation`` dicts with ``title`` and ``url``
+        from ``tool_reference`` chunks; empty when nothing was cited).
 
     Raises
     ------
@@ -110,7 +145,9 @@ def summarize_violence_gore(
         "instructions": INSTRUCTIONS,
         "tools": [{"type": "web_search"}],
         "store": False,
-        "inputs": SUMMARY_PROMPT_TEMPLATE.format(title=title, release_date=release_date),
+        "inputs": SUMMARY_PROMPT_TEMPLATE.format(
+            title=title, release_date=release_date
+        ),
     }
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -127,13 +164,16 @@ def summarize_violence_gore(
     time.sleep(REQUEST_DELAY)
 
     outputs = response.json().get("outputs", [])
-    message_outputs = [entry for entry in outputs if entry.get("type") == "message.output"]
+    message_outputs = [
+        entry for entry in outputs if entry.get("type") == "message.output"
+    ]
     if not message_outputs:
         raise ValueError("Unexpected API response structure: no 'message.output' entry")
+
     return parse_message_content(message_outputs[-1].get("content"))
 
 
-def parse_message_content(content: str | list[dict]) -> dict:
+def parse_message_content(content: str | list[ContentChunk]) -> ParsedSummary:
     """
     Split a conversation message body into summary text and citations.
 
@@ -144,26 +184,28 @@ def parse_message_content(content: str | list[dict]) -> dict:
 
     Parameters
     ----------
-    content : str or list
+    content : str or list[ContentChunk]
         The ``content`` field of a ``message.output`` entry.
 
     Returns
     -------
-    dict
+    ParsedSummary
         Keys ``summary`` (concatenated ``text`` chunks) and ``citations``
-        (list of dicts with ``title`` and ``url``).
+        (list of ``Citation`` dicts with ``title`` and ``url``).
     """
     if isinstance(content, str):
         return {"summary": content, "citations": []}
 
     summary_chunks: list[str] = []
-    citations: list[dict] = []
+    citations: list[Citation] = []
     for chunk in content:
         chunk_type = chunk.get("type")
+
         if chunk_type == "text":
             summary_chunks.append(chunk.get("text", ""))
         elif chunk_type == "tool_reference":
             citations.append({"title": chunk.get("title"), "url": chunk.get("url")})
+
     return {"summary": "".join(summary_chunks), "citations": citations}
 
 
@@ -172,7 +214,7 @@ def violence_gore_summary_source(
     api_key: str = dlt.secrets.value,
     base_url: str = dlt.config.value,
     model: str = DEFAULT_MODEL,
-):
+) -> dlt.sources.DltSource:
     """
     Violence/gore summary source: one Mistral conversation per catalogue movie.
 
@@ -193,12 +235,26 @@ def violence_gore_summary_source(
         Mistral model name. Default is ``mistral-medium-latest``;
         overridable via a ``model`` entry in the ``[sources.mistral]``
         config section.
+
+    Returns
+    -------
+    dlt.sources.DltSource
+        The ``violence_gore_summary`` source with its resource of the
+        same name.
     """
 
     @dlt.resource(name="violence_gore_summary", write_disposition="append")
-    def violence_gore_summary() -> Iterator[TDataItems]:
+    def violence_gore_summary() -> Iterator[SummaryResult]:
         """
         Yield a violence/gore summary row for every movie in the catalogue.
+
+        Yields
+        ------
+        SummaryResult
+            One ``violence_gore_summary`` row: movie identifiers, the
+            model name, summary text, citations and the ``scraped_at``
+            snapshot timestamp. Annotation is a hint only; dlt does not
+            enforce resource return annotations.
         """
         movies = read_movie_catalogue()
         scraped_at = datetime.now(timezone.utc)

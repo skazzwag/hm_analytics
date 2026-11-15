@@ -3,11 +3,11 @@ from __future__ import annotations
 import importlib
 import os
 from pathlib import Path
+from unittest import mock
 
 import dagster
 import pytest
 from dagster import RepositoryDefinition
-from unittest import mock
 
 from ingestion.components import WRITE_DISPOSITION_TAG
 
@@ -54,8 +54,12 @@ def _set_minimal_ingestion_env() -> None:
     # no real API calls are made by definition loading.
     os.environ.setdefault("SOURCES__TMDB__TMDB_CATALOGUE__API_KEY", "test-key")
     os.environ.setdefault("SOURCES__OMDB__BOX_OFFICE__API_KEY", "test-key")
-    os.environ.setdefault("SOURCES__MISTRAL__VIOLENCE_GORE_SUMMARY__API_KEY", "test-key")
-    os.environ.setdefault("SOURCES__MISTRAL__VIOLENCE_GORE_SUMMARY__BASE_URL", "https://api.mistral.ai/v1")
+    os.environ.setdefault(
+        "SOURCES__MISTRAL__VIOLENCE_GORE_SUMMARY__API_KEY", "test-key"
+    )
+    os.environ.setdefault(
+        "SOURCES__MISTRAL__VIOLENCE_GORE_SUMMARY__BASE_URL", "https://api.mistral.ai/v1"
+    )
 
 
 def _patch_tmdb_fetch() -> mock._patch:

@@ -63,6 +63,13 @@ default-groups = "all"
 build-backend.namespace = true
 
 
+[tool.isort]
+# Black-compatible wrapping: default isort (79 chars, backslash
+# continuation) and black disagree on long from-imports and can never
+# both pass; this profile makes `isort --check` agree with black.
+profile = "black"
+
+
 [tool.dg]
 directory_type = "project"
 project.root_module = "ingestion"

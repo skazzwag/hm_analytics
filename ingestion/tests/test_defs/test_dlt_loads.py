@@ -16,7 +16,9 @@ from unittest import mock
 os.environ.setdefault("SOURCES__TMDB__TMDB_CATALOGUE__API_KEY", "test-key")
 os.environ.setdefault("SOURCES__OMDB__BOX_OFFICE__API_KEY", "test-key")
 os.environ.setdefault("SOURCES__MISTRAL__VIOLENCE_GORE_SUMMARY__API_KEY", "test-key")
-os.environ.setdefault("SOURCES__MISTRAL__VIOLENCE_GORE_SUMMARY__BASE_URL", "https://api.mistral.ai/v1")
+os.environ.setdefault(
+    "SOURCES__MISTRAL__VIOLENCE_GORE_SUMMARY__BASE_URL", "https://api.mistral.ai/v1"
+)
 
 
 def _import_loads(module_name: str) -> object:

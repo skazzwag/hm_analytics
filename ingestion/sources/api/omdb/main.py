@@ -21,7 +21,7 @@ __source_name__ = "omdb"
 
 import time
 from datetime import datetime, timezone
-from typing import Iterator
+from typing import Iterator, TypedDict
 
 import dlt
 import requests
@@ -30,7 +30,43 @@ from dlt.common.typing import TDataItems
 REQUEST_DELAY = 0.5  # OMDb free tier: 1,000 req/day — be conservative
 
 
-def read_movie_catalogue() -> list[dict]:
+class MovieCatalogueRecord(TypedDict):
+    """One ``movie_catalogue`` row read from the pipeline destination."""
+
+    id: int
+    title: str
+    original_title: str
+    release_date: str
+
+
+class OmdbLookupParams(TypedDict, total=False):
+    """OMDb title-lookup query parameters."""
+
+    t: str
+    type: str
+    y: str
+
+
+class OmdbRating(TypedDict):
+    """One entry of the OMDb ``Ratings`` array."""
+
+    Source: str
+    Value: str
+
+
+class OmdbRecord(TypedDict, total=False):
+    """Fields read from an OMDb API response body."""
+
+    Response: str
+    imdbID: str
+    imdbRating: str
+    imdbVotes: str
+    Metascore: str
+    Ratings: list[OmdbRating]
+    BoxOffice: str
+
+
+def read_movie_catalogue() -> list[MovieCatalogueRecord]:
     """
     Read the movie catalogue from the pipeline destination.
 
@@ -42,7 +78,7 @@ def read_movie_catalogue() -> list[dict]:
 
     Returns
     -------
-    list[dict]
+    list[MovieCatalogueRecord]
         Records from ``movie_catalogue`` with keys ``id``, ``title``,
         ``original_title``, and ``release_date``.
     """
@@ -56,7 +92,7 @@ def read_movie_catalogue() -> list[dict]:
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
-def omdb_get(base_url: str, api_key: str, params: dict) -> dict:
+def omdb_get(base_url: str, api_key: str, params: OmdbLookupParams) -> OmdbRecord:
     """
     Make a GET request to the OMDb API and apply the rate-limit delay.
 
@@ -66,12 +102,12 @@ def omdb_get(base_url: str, api_key: str, params: dict) -> dict:
         OMDb API base URL (e.g. ``http://www.omdbapi.com/``).
     api_key : str
         OMDb API key appended as the ``apikey`` query parameter.
-    params : dict
-        Additional query parameters (e.g. title lookup, year).
+    params : OmdbLookupParams
+        Additional query parameters (title lookup, type, year).
 
     Returns
     -------
-    dict
+    OmdbRecord
         Parsed JSON response body. Contains ``{"Response": "False"}`` when
         the movie is not found rather than raising an HTTP error.
 
@@ -87,25 +123,25 @@ def omdb_get(base_url: str, api_key: str, params: dict) -> dict:
     return response.json()
 
 
-def lookup_params(movie: dict) -> dict:
+def lookup_params(movie: MovieCatalogueRecord) -> OmdbLookupParams:
     """
-    Build OMDb title-lookup query parameters from a movie dict.
+    Build OMDb title-lookup query parameters from a catalogue record.
 
     Prefers ``title`` over ``original_title``. Includes release year when
     available to disambiguate remakes and sequels.
 
     Parameters
     ----------
-    movie : dict
+    movie : MovieCatalogueRecord
         Movie record with at least ``title`` or ``original_title``, and
         optionally ``release_date`` (ISO 8601 date string).
 
     Returns
     -------
-    dict
-        Query parameter dict suitable for passing to ``omdb_get``.
+    OmdbLookupParams
+        Query parameters suitable for passing to ``omdb_get``.
     """
-    params: dict = {
+    params: OmdbLookupParams = {
         "t": movie.get("title") or movie.get("original_title", ""),
         "type": "movie",
     }
@@ -119,7 +155,7 @@ def lookup_params(movie: dict) -> dict:
 def box_office_source(
     api_key: str = dlt.secrets.value,
     base_url: str = dlt.config.value,
-):
+) -> dlt.sources.DltSource:
     """
     OMDb box-office snapshot source: full catalogue every run.
 
@@ -137,6 +173,12 @@ def box_office_source(
         OMDb API key. Resolved from env var ``SOURCES__OMDB__API_KEY``.
     base_url : str
         OMDb API base URL. Resolved from ``.dlt/config.toml``.
+
+    Returns
+    -------
+    dlt.sources.DltSource
+        The ``box_office`` source with its ``box_office_snapshots``
+        resource.
     """
 
     @dlt.resource(
@@ -144,13 +186,15 @@ def box_office_source(
         write_disposition="append",
         primary_key=["imdb_id", "scraped_at"],
     )
-    def box_office_snapshots(movies: list[dict] | None = None) -> Iterator[TDataItems]:
+    def box_office_snapshots(
+        movies: list[MovieCatalogueRecord] | None = None,
+    ) -> Iterator[TDataItems]:
         """
         Yield a box-office snapshot for every movie in the catalogue.
 
         Parameters
         ----------
-        movies : list[dict], optional
+        movies : list[MovieCatalogueRecord], optional
             Full movie list sorted by ``id``, typically from
             ``movie_catalogue``. Read from the pipeline destination when
             omitted.
@@ -165,7 +209,7 @@ def box_office_source(
             if data.get("Response") == "False":
                 continue
 
-            ratings_list = data.get("Ratings", [])
+            ratings_list: list[OmdbRating] = data.get("Ratings", [])
             rt_score = next(
                 (r["Value"] for r in ratings_list if r["Source"] == "Rotten Tomatoes"),
                 None,

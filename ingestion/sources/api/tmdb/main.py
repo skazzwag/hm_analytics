@@ -19,7 +19,7 @@ Resolved from environment variables (loaded via ``.env``):
 __source_name__ = "tmdb"
 
 import time
-from typing import Iterator
+from typing import Iterator, TypedDict
 
 import dlt
 import requests
@@ -33,30 +33,75 @@ REQUEST_DELAY = 0.25  # TMDB allows ~4 requests/sec
 TEMPORAL_DISCOVER_FIELDS = {"popularity", "vote_average", "vote_count"}
 
 
+class TmdbQueryParams(TypedDict, total=False):
+    """Query parameters for the TMDB ``/discover/movie`` endpoint."""
+
+    with_genres: int
+    sort_by: str
+    page: int
+
+
+class TmdbMovie(TypedDict, total=False):
+    """One movie item from a TMDB ``/discover/movie`` results page.
+
+    Temporal fields (``popularity``, ``vote_average``, ``vote_count``) are
+    present in discover items but stripped before rows are yielded.
+    """
+
+    id: int
+    title: str
+    original_title: str
+    original_language: str
+    overview: str
+    release_date: str
+    adult: bool
+    video: bool
+    poster_path: str | None
+    backdrop_path: str | None
+    genre_ids: list[int]
+    popularity: float
+    vote_average: float
+    vote_count: int
+
+
+class TmdbDiscoverPage(TypedDict):
+    """One page of TMDB ``/discover/movie`` results."""
+
+    page: int
+    results: list[TmdbMovie]
+    total_pages: int
+
+
 def tmdb_get(
     base_url: str,
     path: str,
     api_key: str,
-    params: dict | None = None,
-) -> dict:
+    params: TmdbQueryParams | None = None,
+) -> TmdbDiscoverPage:
     """
-    Make a GET request to the TMDB API and apply the rate-limit delay.
+    Make a GET request to the TMDB discover endpoint and apply the
+    rate-limit delay.
+
+    Used for (and returns) the ``/discover/movie`` endpoint response only;
+    the return type is therefore the discover-specific ``TmdbDiscoverPage``.
 
     Parameters
     ----------
     base_url : str
         TMDB API base URL (e.g. ``https://api.themoviedb.org/3``).
     path : str
-        Endpoint path, including leading slash (e.g. ``/discover/movie``).
+        Discover endpoint path, including leading slash
+        (e.g. ``/discover/movie``).
     api_key : str
         TMDB API key appended as a query parameter.
-    params : dict, optional
-        Additional query parameters to merge into the request.
+    params : TmdbQueryParams, optional
+        Additional discover query parameters (``with_genres``, ``sort_by``,
+        ``page``) to merge into the request.
 
     Returns
     -------
-    dict
-        Parsed JSON response body.
+    TmdbDiscoverPage
+        Parsed JSON response body: one page of discover results.
 
     Raises
     ------
@@ -71,7 +116,7 @@ def tmdb_get(
     return response.json()
 
 
-def paginate_discover(base_url: str, api_key: str, max_pages: int) -> list[dict]:
+def paginate_discover(base_url: str, api_key: str, max_pages: int) -> list[TmdbMovie]:
     """
     Paginate the TMDB discover endpoint and return all results as a list.
 
@@ -90,10 +135,10 @@ def paginate_discover(base_url: str, api_key: str, max_pages: int) -> list[dict]
 
     Returns
     -------
-    list[dict]
+    list[TmdbMovie]
         All movie objects returned across all fetched pages, in order.
     """
-    movies: list[dict] = []
+    movies: list[TmdbMovie] = []
     page = 1
     while page <= max_pages:
         data = tmdb_get(
@@ -106,8 +151,10 @@ def paginate_discover(base_url: str, api_key: str, max_pages: int) -> list[dict]
                 "page": page,
             },
         )
+        # TmdbDiscoverPage declares total_pages required; .get() is defensive.
         total_pages = data.get("total_pages", 1)
         effective_max = min(max_pages, total_pages)
+        # TmdbDiscoverPage declares results required; .get() is defensive.
         movies.extend(data.get("results", []))
         page += 1
         if page > effective_max:
@@ -120,7 +167,7 @@ def tmdb_catalogue_source(
     api_key: str = dlt.secrets.value,
     base_url: str = dlt.config.value,
     max_pages: int = 25,
-):
+) -> dlt.sources.DltSource:
     """
     TMDB movie catalogue: static fields from the discover endpoint.
 
@@ -140,6 +187,11 @@ def tmdb_catalogue_source(
         TMDB API base URL. Resolved from ``.dlt/config.toml``.
     max_pages : int, optional
         Discover pages to fetch (20 movies per page). Default is 25.
+
+    Returns
+    -------
+    dlt.sources.DltSource
+        The ``tmdb_catalogue`` source with its ``movie_catalogue`` resource.
     """
 
     @dlt.resource(

@@ -28,7 +28,7 @@ class RefreshableDltLoadCollectionComponent(DltLoadCollectionComponent):
         self,
         context: dg.AssetExecutionContext,
         dlt_pipeline_resource: DagsterDltResource,
-    ) -> Iterator:
+    ) -> Iterator[dg.MaterializeResult | dg.AssetMaterialization]:
         """Run the dlt pipeline, honoring a write disposition run tag when set.
 
         Parameters
@@ -40,8 +40,9 @@ class RefreshableDltLoadCollectionComponent(DltLoadCollectionComponent):
 
         Yields
         ------
-        Iterator
-            Events from the dlt pipeline execution.
+        Iterator[dg.MaterializeResult | dg.AssetMaterialization]
+            MaterializeResult or AssetMaterialization events from the dlt
+            pipeline execution.
 
         Raises
         ------
