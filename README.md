@@ -17,7 +17,7 @@ hm_analytics/
 │   │       ├── omdb/              # OMDb box-office snapshot source
 │   │       └── violence_gore_summary/ # Mistral web-search summary source
 │   ├── dockerfiles/               # user-code and webserver images
-│   └── run_pipeline.py            # CLI runner (manual runs without Dagster)
+│   └── definitions.py             # Dagster definitions entrypoint
 ├── transformation/                # dbt Core transformations (DuckDB / MotherDuck)
 │   ├── models/0_sources/          # source declarations
 │   ├── models/1_staging/          # stg_ — clean and standardize
@@ -67,15 +67,7 @@ ensure that you have `direnv` installed, the `eval "$(direnv hook bash)"` added 
 
 ### 3. Run the pipeline
 
-Without Dagster (manual runs):
-
-```bash
-uv run ingestion/run_pipeline.py             # all three pipelines
-uv run ingestion/run_pipeline.py --tmdb      # catalogue only
-uv run ingestion/run_pipeline.py --box-office --violence-gore
-```
-
-With Dagster:
+All pipeline runs go through Dagster (manual triggers — no schedules):
 
 ```bash
 make dev       # Dagster UI without Docker
